@@ -14,6 +14,7 @@ import {
   WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline'
 import { servicesAPI } from '@/lib/api'
+import AdvancedSearch, { SearchFilters } from '@/components/search/AdvancedSearch'
 
 interface Service {
   id: string
@@ -48,24 +49,14 @@ export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('')
-  const [selectedSubcategory, setSelectedSubcategory] = useState('')
-  const [priceRange, setPriceRange] = useState({ min: '', max: '' })
-  const [sortBy, setSortBy] = useState('relevance')
+  const [searchLoading, setSearchLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
     fetchCategories()
     fetchServices()
   }, [])
-
-  useEffect(() => {
-    setCurrentPage(1)
-    fetchServices()
-  }, [searchTerm, selectedCategory, selectedSubcategory, priceRange, sortBy])
 
   const fetchCategories = async () => {
     try {
@@ -78,18 +69,13 @@ export default function ServicesPage() {
     }
   }
 
-  const fetchServices = async () => {
+  const fetchServices = async (filters?: SearchFilters) => {
     setIsLoading(true)
     try {
       const params = {
         page: currentPage,
         limit: 12,
-        search: searchTerm,
-        categoryId: selectedCategory,
-        subcategoryId: selectedSubcategory,
-        minPrice: priceRange.min ? parseFloat(priceRange.min) : undefined,
-        maxPrice: priceRange.max ? parseFloat(priceRange.max) : undefined,
-        sortBy,
+        ...filters
       }
 
       const response = await servicesAPI.getAll(params)
@@ -104,17 +90,15 @@ export default function ServicesPage() {
     }
   }
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    fetchServices()
-  }
-
-  const clearFilters = () => {
-    setSearchTerm('')
-    setSelectedCategory('')
-    setSelectedSubcategory('')
-    setPriceRange({ min: '', max: '' })
-    setSortBy('relevance')
+  const handleAdvancedSearch = async (filters: SearchFilters) => {
+    try {
+      setSearchLoading(true)
+      await fetchServices(filters)
+    } catch (error) {
+      console.error('Error searching services:', error)
+    } finally {
+      setSearchLoading(false)
+    }
   }
 
   const getPriceText = (service: Service) => {
@@ -151,139 +135,13 @@ export default function ServicesPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="mb-4">
-            <div className="flex gap-4">
-              <div className="flex-1 relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Meklēt pakalpojumus..."
-                  className="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <button
-                type="submit"
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Meklēt
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowFilters(!showFilters)}
-                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <FunnelIcon className="h-5 w-5" />
-              </button>
-            </div>
-          </form>
-
-          {/* Filters */}
-          {showFilters && (
-            <div className="border-t pt-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {/* Category Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Kategorija
-                  </label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => {
-                      setSelectedCategory(e.target.value)
-                      setSelectedSubcategory('')
-                    }}
-                    className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Visas kategorijas</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Subcategory Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Apakškategorija
-                  </label>
-                  <select
-                    value={selectedSubcategory}
-                    onChange={(e) => setSelectedSubcategory(e.target.value)}
-                    className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                    disabled={!selectedCategory}
-                  >
-                    <option value="">Visas apakškategorijas</option>
-                    {selectedCategory &&
-                      categories
-                        .find((c) => c.id === selectedCategory)
-                        ?.subcategories.map((subcategory) => (
-                          <option key={subcategory.id} value={subcategory.id}>
-                            {subcategory.name}
-                          </option>
-                        ))}
-                  </select>
-                </div>
-
-                {/* Price Range */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Cena (€)
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      placeholder="Min"
-                      value={priceRange.min}
-                      onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-                      className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Max"
-                      value={priceRange.max}
-                      onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-                      className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Sort By */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Kārtot pēc
-                  </label>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="relevance">Atbilstība</option>
-                    <option value="price_asc">Cena (augoši)</option>
-                    <option value="price_desc">Cena (dilstoši)</option>
-                    <option value="rating_desc">Vērtējums</option>
-                    <option value="reviews_desc">Atsauksmju skaits</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Clear Filters */}
-              <div className="flex justify-end">
-                <button
-                  onClick={clearFilters}
-                  className="text-sm text-gray-600 hover:text-gray-800 underline"
-                >
-                  Notīrīt filtrus
-                </button>
-              </div>
-            </div>
-          )}
+        {/* Advanced Search */}
+        <div className="mb-6">
+          <AdvancedSearch
+            onSearch={handleAdvancedSearch}
+            categories={categories}
+            loading={searchLoading}
+          />
         </div>
 
         {/* Results */}

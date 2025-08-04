@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { 
   WrenchScrewdriverIcon, 
@@ -11,11 +12,16 @@ import {
   ChatBubbleLeftRightIcon,
   ClockIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  ChartBarIcon,
+  BellIcon
 } from '@heroicons/react/24/outline'
 import { bookingsAPI, userAPI, servicesAPI } from '@/lib/api'
+import NotificationBell from '@/components/notifications/NotificationBell'
+import AnalyticsDashboard from '@/components/analytics/AnalyticsDashboard'
 
 export default function ProviderDashboard() {
+  const t = useTranslations('dashboard.provider')
   const [stats, setStats] = useState({
     totalServices: 0,
     activeBookings: 0,
@@ -27,6 +33,8 @@ export default function ProviderDashboard() {
   const [recentBookings, setRecentBookings] = useState([])
   const [recentServices, setRecentServices] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [showAnalytics, setShowAnalytics] = useState(false)
+  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month')
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -96,15 +104,54 @@ export default function ProviderDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome section */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Laipni lūdzam, sniedzēj!
-        </h1>
-        <p className="text-gray-600">
-          Šeit jūs varat pārvaldīt savus pakalpojumus un rezervācijas.
-        </p>
+      {/* Header with Notifications */}
+      <div className="flex items-center justify-between">
+        <div className="bg-white rounded-lg shadow p-6 flex-1">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Laipni lūdzam, sniedzēj!
+          </h1>
+          <p className="text-gray-600">
+            Šeit jūs varat pārvaldīt savus pakalpojumus un rezervācijas.
+          </p>
+        </div>
+        <div className="ml-4">
+          <NotificationBell />
+        </div>
       </div>
+
+      {/* Analytics Toggle */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <ChartBarIcon className="h-6 w-6 text-blue-500 mr-2" />
+            <h2 className="text-lg font-medium text-gray-900">Analīze</h2>
+          </div>
+          <div className="flex items-center gap-4">
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value as 'week' | 'month' | 'year')}
+              className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="week">Nedēļa</option>
+              <option value="month">Mēnesis</option>
+              <option value="year">Gads</option>
+            </select>
+            <button
+              onClick={() => setShowAnalytics(!showAnalytics)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+            >
+              {showAnalytics ? 'Slēpt analīzi' : 'Rādīt analīzi'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Analytics Dashboard */}
+      {showAnalytics && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <AnalyticsDashboard userId="current" timeRange={timeRange} />
+        </div>
+      )}
 
       {/* Stats grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
