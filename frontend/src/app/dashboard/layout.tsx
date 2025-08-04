@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { 
-  HomeIcon, 
-  UserIcon, 
-  CogIcon, 
+import {
+  HomeIcon,
+  UserIcon,
+  CogIcon,
   BellIcon,
   WrenchScrewdriverIcon,
   CalendarIcon,
@@ -17,6 +17,7 @@ import {
   Bars3Icon,
   XMarkIcon
 } from '@heroicons/react/24/outline'
+import MobileNavigation from '@/components/navigation/MobileNavigation'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -164,55 +165,49 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content */}
       <div className="lg:pl-64 flex flex-col flex-1">
-        {/* Top bar */}
-        <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white shadow">
-          <button
-            type="button"
-            className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Bars3Icon className="h-6 w-6" />
-          </button>
-          <div className="flex-1 px-4 flex justify-between">
-            <div className="flex-1 flex items-center">
-              <h1 className="text-2xl font-semibold text-gray-900">
-                {isProvider ? 'Sniedzēja Panelis' : 'Klienta Panelis'}
-              </h1>
-            </div>
-            <div className="ml-4 flex items-center md:ml-6">
-              {/* Notifications */}
-              <button className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <BellIcon className="h-6 w-6" />
-              </button>
+                            {/* Top bar */}
+                    <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white shadow">
+                      <MobileNavigation user={user} />
+                                <div className="flex-1 px-4 flex justify-between">
+                        <div className="flex-1 flex items-center">
+                          <h1 className="text-2xl font-semibold text-gray-900">
+                            {isProvider ? 'Sniedzēja Panelis' : 'Klienta Panelis'}
+                          </h1>
+                        </div>
+                        <div className="ml-4 flex items-center md:ml-6">
+                          {/* Notifications */}
+                          <button className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <BellIcon className="h-6 w-6" />
+                          </button>
 
-              {/* Profile dropdown */}
-              <div className="ml-3 relative">
-                <div className="flex items-center">
-                  <div className="flex items-center">
-                    <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">
-                        {user?.firstName?.charAt(0) || 'U'}
-                      </span>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-700">
-                        {user?.firstName} {user?.lastName}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {isProvider ? 'Pakalpojumu sniedzējs' : 'Klients'}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="ml-4 text-sm text-gray-500 hover:text-gray-700"
-                  >
-                    Iziet
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+                          {/* Profile dropdown */}
+                          <div className="ml-3 relative">
+                            <div className="flex items-center">
+                              <div className="flex items-center">
+                                <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
+                                  <span className="text-white text-sm font-medium">
+                                    {user?.firstName?.charAt(0) || 'U'}
+                                  </span>
+                                </div>
+                                <div className="hidden md:block ml-3">
+                                  <p className="text-sm font-medium text-gray-700">
+                                    {user?.firstName} {user?.lastName}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {isProvider ? 'Pakalpojumu sniedzējs' : 'Klients'}
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={handleLogout}
+                                className="hidden md:block ml-4 text-sm text-gray-500 hover:text-gray-700"
+                              >
+                                Iziet
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
         </div>
 
         {/* Page content */}
