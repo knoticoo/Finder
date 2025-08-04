@@ -1,0 +1,355 @@
+{
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "confirm": "Подтвердить",
+    "back": "Назад",
+    "next": "Далее",
+    "previous": "Предыдущий",
+    "search": "Поиск",
+    "filter": "Фильтр",
+    "sort": "Сортировка",
+    "view": "Просмотр",
+    "close": "Закрыть",
+    "yes": "Да",
+    "no": "Нет",
+    "ok": "ОК",
+    "loading": "Загрузка...",
+    "noData": "Нет данных",
+    "retry": "Попробовать снова"
+  },
+  "navigation": {
+    "home": "Главная",
+    "services": "Услуги",
+    "about": "О нас",
+    "contact": "Контакты",
+    "login": "Войти",
+    "register": "Регистрация",
+    "logout": "Выйти",
+    "profile": "Профиль",
+    "dashboard": "Панель",
+    "bookings": "Бронирования",
+    "messages": "Сообщения",
+    "reviews": "Отзывы",
+    "settings": "Настройки"
+  },
+  "auth": {
+    "login": {
+      "title": "Войти",
+      "subtitle": "Войдите в свой аккаунт",
+      "email": "Email адрес",
+      "password": "Пароль",
+      "rememberMe": "Запомнить меня",
+      "forgotPassword": "Забыли пароль?",
+      "loginButton": "Войти",
+      "noAccount": "Нет аккаунта?",
+      "registerLink": "Зарегистрироваться",
+      "or": "или",
+      "googleLogin": "Войти через Google",
+      "facebookLogin": "Войти через Facebook"
+    },
+    "register": {
+      "title": "Регистрация",
+      "subtitle": "Создайте новый аккаунт",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "email": "Email адрес",
+      "phone": "Телефон (необязательно)",
+      "password": "Пароль",
+      "confirmPassword": "Подтвердите пароль",
+      "role": {
+        "title": "Тип аккаунта",
+        "customer": "Клиент",
+        "provider": "Поставщик услуг"
+      },
+      "language": {
+        "title": "Язык",
+        "latvian": "Latviešu",
+        "russian": "Русский",
+        "english": "English"
+      },
+      "agreeToTerms": "Я согласен с условиями использования",
+      "registerButton": "Зарегистрироваться",
+      "hasAccount": "Уже есть аккаунт?",
+      "loginLink": "Войти"
+    },
+    "forgotPassword": {
+      "title": "Забыли пароль?",
+      "subtitle": "Введите ваш email для получения ссылки для сброса пароля",
+      "email": "Email адрес",
+      "sendButton": "Отправить ссылку",
+      "backToLogin": "Вернуться к входу"
+    },
+    "resetPassword": {
+      "title": "Сброс пароля",
+      "subtitle": "Введите новый пароль",
+      "password": "Новый пароль",
+      "confirmPassword": "Подтвердите новый пароль",
+      "resetButton": "Сбросить пароль",
+      "invalidToken": "Недействительная ссылка для сброса",
+      "success": "Пароль успешно изменен!"
+    }
+  },
+  "dashboard": {
+    "customer": {
+      "title": "Панель клиента",
+      "welcome": "Добро пожаловать обратно!",
+      "subtitle": "Здесь вы можете управлять своими бронированиями и просматривать активность.",
+      "stats": {
+        "totalBookings": "Всего бронирований",
+        "activeBookings": "Активные бронирования",
+        "averageRating": "Средний рейтинг",
+        "totalSpent": "Общие расходы"
+      },
+      "recentBookings": "Последние бронирования",
+      "viewAll": "Посмотреть все",
+      "quickActions": {
+        "bookService": "Забронировать услугу",
+        "messages": "Сообщения",
+        "reviews": "Мои отзывы"
+      }
+    },
+    "provider": {
+      "title": "Панель поставщика",
+      "welcome": "Добро пожаловать, поставщик!",
+      "subtitle": "Здесь вы можете управлять своими услугами и бронированиями.",
+      "stats": {
+        "totalServices": "Активные услуги",
+        "activeBookings": "Активные бронирования",
+        "averageRating": "Средний рейтинг",
+        "totalEarnings": "Общий доход"
+      },
+      "recentBookings": "Последние бронирования",
+      "recentServices": "Мои услуги",
+      "manageServices": "Управление",
+      "quickActions": {
+        "manageServices": "Управление услугами",
+        "bookings": "Бронирования",
+        "messages": "Сообщения"
+      }
+    }
+  },
+  "search": {
+    "placeholder": "Поиск услуг...",
+    "search": "Поиск",
+    "searching": "Поиск...",
+    "filters": "Фильтры",
+    "category": "Категория",
+    "allCategories": "Все категории",
+    "location": "Местоположение",
+    "locationPlaceholder": "Введите город или адрес",
+    "priceRange": "Диапазон цен",
+    "min": "Мин",
+    "max": "Макс",
+    "minRating": "Минимальный рейтинг",
+    "anyRating": "Любой рейтинг",
+    "fourPlus": "4+ звезды",
+    "threePlus": "3+ звезды",
+    "twoPlus": "2+ звезды",
+    "availability": "Доступность",
+    "immediate": "Сразу",
+    "sameDay": "Сегодня",
+    "nextDay": "Завтра",
+    "weekend": "В выходные",
+    "features": "Функции",
+    "verifiedProvider": "Проверенный поставщик",
+    "insured": "Застрахован",
+    "licensed": "Лицензирован",
+    "backgroundChecked": "Проверенное прошлое",
+    "sortBy": "Сортировать по",
+    "relevance": "Релевантность",
+    "priceAsc": "Цена (по возрастанию)",
+    "priceDesc": "Цена (по убыванию)",
+    "rating": "Рейтинг",
+    "distance": "Расстояние",
+    "newest": "Новые",
+    "clearFilters": "Очистить фильтры",
+    "filtersActive": "Активные фильтры",
+    "noFilters": "Нет активных фильтров"
+  },
+  "notifications": {
+    "notifications": "Уведомления",
+    "all": "Все",
+    "unread": "Непрочитанные",
+    "markAsRead": "Отметить как прочитанное",
+    "markAllAsRead": "Отметить все как прочитанные",
+    "noNotifications": "Нет уведомлений",
+    "noNotificationsDescription": "У вас нет уведомлений",
+    "noUnreadNotifications": "Нет непрочитанных уведомлений",
+    "noUnreadDescription": "Все уведомления прочитаны",
+    "justNow": "Только что",
+    "minutesAgo": "{minutes} минут назад",
+    "hoursAgo": "{hours} часов назад",
+    "daysAgo": "{days} дней назад"
+  },
+  "analytics": {
+    "totalEarnings": "Общий доход",
+    "totalBookings": "Общие заказы",
+    "averageRating": "Средний рейтинг",
+    "totalCustomers": "Общие клиенты",
+    "performanceMetrics": "Показатели производительности",
+    "completionRate": "Уровень завершения",
+    "avgResponseTime": "Среднее время ответа",
+    "minutes": "минут",
+    "customerInsights": "Анализ клиентов",
+    "newCustomers": "Новые клиенты",
+    "returningCustomers": "Повторные клиенты",
+    "topServices": "Топ услуги",
+    "service": "Услуга",
+    "bookings": "заказы",
+    "earnings": "Доход",
+    "rating": "Рейтинг",
+    "topLocations": "Топ места",
+    "error": "Ошибка",
+    "fetchError": "Не удалось загрузить данные аналитики"
+  },
+  "services": {
+    "title": "Услуги",
+    "subtitle": "Найдите надежных поставщиков услуг в вашем районе",
+    "search": {
+      "placeholder": "Поиск услуг...",
+      "button": "Поиск"
+    },
+    "filters": {
+      "category": "Категория",
+      "subcategory": "Подкатегория",
+      "priceRange": "Цена (€)",
+      "sortBy": "Сортировать по",
+      "allCategories": "Все категории",
+      "allSubcategories": "Все подкатегории",
+      "min": "Мин",
+      "max": "Макс",
+      "sortOptions": {
+        "relevance": "Релевантность",
+        "price_asc": "Цена (по возрастанию)",
+        "price_desc": "Цена (по убыванию)",
+        "rating": "Рейтинг",
+        "newest": "Новые"
+      }
+    },
+    "card": {
+      "from": "От",
+      "perHour": "/час",
+      "fixed": "фиксированная цена",
+      "negotiable": "договорная",
+      "rating": "рейтинг",
+      "reviews": "отзывов",
+      "bookNow": "Забронировать сейчас",
+      "viewDetails": "Посмотреть детали"
+    },
+    "noResults": {
+      "title": "Результатов не найдено",
+      "message": "Попробуйте изменить критерии поиска"
+    }
+  },
+  "bookings": {
+    "title": "Бронирования",
+    "status": {
+      "pending": "Ожидает подтверждения",
+      "confirmed": "Подтверждено",
+      "inProgress": "Выполняется",
+      "completed": "Завершено",
+      "cancelled": "Отменено"
+    },
+    "actions": {
+      "confirm": "Подтвердить",
+      "start": "Начать",
+      "complete": "Завершить",
+      "cancel": "Отменить"
+    },
+    "details": {
+      "service": "Услуга",
+      "provider": "Поставщик",
+      "customer": "Клиент",
+      "date": "Дата",
+      "time": "Время",
+      "address": "Адрес",
+      "price": "Цена",
+      "notes": "Примечания"
+    }
+  },
+  "reviews": {
+    "title": "Отзывы",
+    "writeReview": "Написать отзыв",
+    "rating": "Рейтинг",
+    "comment": "Комментарий",
+    "submit": "Отправить",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "reply": "Ответить",
+    "noReviews": "Нет отзывов"
+  },
+  "messages": {
+    "title": "Сообщения",
+    "conversations": "Разговоры",
+    "noConversations": "Нет разговоров",
+    "noMessages": "Нет сообщений",
+    "typeMessage": "Написать сообщение...",
+    "send": "Отправить",
+    "online": "онлайн",
+    "offline": "офлайн"
+  },
+  "profile": {
+    "title": "Профиль",
+    "personalInfo": "Личная информация",
+    "businessInfo": "Информация о бизнесе",
+    "professionalInfo": "Профессиональная информация",
+    "settings": "Настройки",
+    "accountInfo": "Информация об аккаунте",
+    "saveChanges": "Сохранить изменения",
+    "saving": "Сохранение...",
+    "saved": "Изменения сохранены!"
+  },
+  "landing": {
+    "hero": {
+      "title": "Все Услуги в Латвии",
+      "subtitle": "Найдите надежных поставщиков услуг в вашем районе",
+      "cta": "Начать поиск",
+      "secondaryCta": "Стать поставщиком"
+    },
+    "features": {
+      "title": "Почему выбрать VisiPakalpojumi?",
+      "trusted": {
+        "title": "Надежные поставщики",
+        "description": "Все поставщики проверены и имеют хорошие отзывы"
+      },
+      "secure": {
+        "title": "Безопасная оплата",
+        "description": "Защищенные платежи и гарантированное качество"
+      },
+      "fast": {
+        "title": "Быстро и легко",
+        "description": "Забронируйте услугу в несколько кликов"
+      }
+    },
+    "popularServices": {
+      "title": "Популярные услуги",
+      "cleaning": "Уборка дома",
+      "repair": "Ремонт",
+      "tutoring": "Обучение",
+      "gardening": "Уход за садом",
+      "moving": "Переезд",
+      "petCare": "Уход за животными"
+    }
+  },
+  "errors": {
+    "general": "Что-то пошло не так. Пожалуйста, попробуйте снова.",
+    "network": "Ошибка сети. Проверьте подключение к интернету.",
+    "unauthorized": "У вас нет разрешения выполнить это действие.",
+    "notFound": "Страница не найдена.",
+    "serverError": "Ошибка сервера. Пожалуйста, попробуйте позже."
+  },
+  "validation": {
+    "required": "Это поле обязательно",
+    "email": "Пожалуйста, введите действительный email",
+    "minLength": "Минимальная длина {min} символов",
+    "maxLength": "Максимальная длина {max} символов",
+    "passwordMatch": "Пароли не совпадают",
+    "passwordStrength": "Пароль должен содержать минимум 8 символов с заглавными и строчными буквами, а также цифрами"
+  }
+}
