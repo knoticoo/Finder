@@ -19,6 +19,8 @@ import serviceRoutes from '@/routes/services';
 import bookingRoutes from '@/routes/bookings';
 import reviewRoutes from '@/routes/reviews';
 import messageRoutes from '@/routes/messages';
+import subscriptionRoutes from '@/routes/subscriptions';
+import referralRoutes from '@/routes/referrals';
 
 // Load environment variables
 dotenv.config();
@@ -80,6 +82,8 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/referrals', referralRoutes);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
