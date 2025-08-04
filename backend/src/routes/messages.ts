@@ -1,19 +1,24 @@
 import { Router } from 'express';
-import { authenticate, authorize } from '@/middleware/auth';
+import { authenticate } from '@/middleware/auth';
+import {
+  sendMessage,
+  getConversation,
+  getUserConversations,
+  markAsRead,
+  deleteMessage
+} from '@/controllers/messageController';
+import { validateMessage } from '@/middleware/validation';
 
 const router = Router();
 
-// TODO: Implement message routes
-// - GET /api/messages - List user messages
-// - GET /api/messages/:id - Get message details
-// - POST /api/messages - Send new message
-// - PUT /api/messages/:id/read - Mark message as read
-// - DELETE /api/messages/:id - Delete message
-// - GET /api/messages/conversation/:userId - Get conversation with user
-// - GET /api/messages/booking/:bookingId - Get booking messages
+// All routes require authentication
+router.use(authenticate);
 
-router.get('/', (req, res) => {
-  res.json({ message: 'Message routes - TODO: Implement' });
-});
+// Message routes
+router.post('/', validateMessage, sendMessage);
+router.get('/conversations', getUserConversations);
+router.get('/conversation', getConversation);
+router.put('/read', markAsRead);
+router.delete('/:id', deleteMessage);
 
 export default router;
