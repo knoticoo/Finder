@@ -31,6 +31,14 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Check if running as root
+if [[ $EUID -eq 0 ]]; then
+   print_status "Running as root - proceeding with shutdown"
+else
+   print_error "This script must be run as root"
+   exit 1
+fi
+
 # Stop PM2 processes
 print_status "Stopping PM2 processes..."
 pm2 stop visipakalpojumi-backend 2>/dev/null || print_warning "No PM2 process found"
@@ -41,11 +49,11 @@ pm2 save 2>/dev/null || print_warning "No PM2 processes to save"
 
 # Stop Nginx
 print_status "Stopping Nginx..."
-sudo systemctl stop nginx
+systemctl stop nginx
 
 # Stop PostgreSQL (optional - uncomment if you want to stop it)
 # print_status "Stopping PostgreSQL..."
-# sudo systemctl stop postgresql
+# systemctl stop postgresql
 
 # Kill any remaining Node.js processes on port 3001
 print_status "Checking for remaining processes on port 3001..."
@@ -78,7 +86,7 @@ else
 fi
 
 # Check Nginx status
-if sudo systemctl is-active --quiet nginx; then
+if systemctl is-active --quiet nginx; then
     print_warning "Nginx is still running"
 else
     print_success "Nginx stopped"
@@ -98,10 +106,10 @@ else
 fi
 echo ""
 echo "- Nginx status:"
-sudo systemctl status nginx --no-pager -l || echo "  Nginx not running"
+systemctl status nginx --no-pager -l || echo "  Nginx not running"
 echo ""
 echo "- PostgreSQL status:"
-sudo systemctl status postgresql --no-pager -l || echo "  PostgreSQL not running"
+systemctl status postgresql --no-pager -l || echo "  PostgreSQL not running"
 
 print_success "Application stopped successfully!"
 echo ""
@@ -109,7 +117,7 @@ echo "🔄 To restart the application:"
 echo "  ./start.sh"
 echo ""
 echo "📋 Useful commands:"
-echo "- Start Nginx: sudo systemctl start nginx"
-echo "- Start PostgreSQL: sudo systemctl start postgresql"
+echo "- Start Nginx: systemctl start nginx"
+echo "- Start PostgreSQL: systemctl start postgresql"
 echo "- View PM2 logs: pm2 logs"
 echo "- Check system resources: htop"
