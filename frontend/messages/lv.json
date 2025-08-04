@@ -1,0 +1,281 @@
+{
+  "common": {
+    "loading": "Ielāde...",
+    "error": "Kļūda",
+    "success": "Veiksmīgi",
+    "cancel": "Atcelt",
+    "save": "Saglabāt",
+    "edit": "Rediģēt",
+    "delete": "Dzēst",
+    "confirm": "Apstiprināt",
+    "back": "Atpakaļ",
+    "next": "Tālāk",
+    "previous": "Iepriekšējais",
+    "search": "Meklēt",
+    "filter": "Filtrs",
+    "sort": "Kārtot",
+    "view": "Skatīt",
+    "close": "Aizvērt",
+    "yes": "Jā",
+    "no": "Nē",
+    "ok": "Labi",
+    "loading": "Ielāde...",
+    "noData": "Nav datu",
+    "retry": "Mēģināt vēlreiz"
+  },
+  "navigation": {
+    "home": "Sākums",
+    "services": "Pakalpojumi",
+    "about": "Par mums",
+    "contact": "Kontakti",
+    "login": "Ielogoties",
+    "register": "Reģistrēties",
+    "logout": "Iziet",
+    "profile": "Profils",
+    "dashboard": "Panelis",
+    "bookings": "Rezervācijas",
+    "messages": "Ziņojumi",
+    "reviews": "Atsauksmes",
+    "settings": "Iestatījumi"
+  },
+  "auth": {
+    "login": {
+      "title": "Ielogoties",
+      "subtitle": "Ielogojieties savā kontā",
+      "email": "E-pasta adrese",
+      "password": "Parole",
+      "rememberMe": "Atcerēties mani",
+      "forgotPassword": "Aizmirsi paroli?",
+      "loginButton": "Ielogoties",
+      "noAccount": "Nav konta?",
+      "registerLink": "Reģistrējieties",
+      "or": "vai",
+      "googleLogin": "Ielogoties ar Google",
+      "facebookLogin": "Ielogoties ar Facebook"
+    },
+    "register": {
+      "title": "Reģistrēties",
+      "subtitle": "Izveidojiet jaunu kontu",
+      "firstName": "Vārds",
+      "lastName": "Uzvārds",
+      "email": "E-pasta adrese",
+      "phone": "Tālrunis (nav obligāts)",
+      "password": "Parole",
+      "confirmPassword": "Apstiprināt paroli",
+      "role": {
+        "title": "Konta tips",
+        "customer": "Klients",
+        "provider": "Pakalpojumu sniedzējs"
+      },
+      "language": {
+        "title": "Valoda",
+        "latvian": "Latviešu",
+        "russian": "Русский",
+        "english": "English"
+      },
+      "agreeToTerms": "Es piekrītu lietošanas noteikumiem",
+      "registerButton": "Reģistrēties",
+      "hasAccount": "Jau ir konts?",
+      "loginLink": "Ielogoties"
+    },
+    "forgotPassword": {
+      "title": "Aizmirsi paroli?",
+      "subtitle": "Ievadiet savu e-pasta adresi, lai saņemtu paroles atjaunošanas saiti",
+      "email": "E-pasta adrese",
+      "sendButton": "Nosūtīt saiti",
+      "backToLogin": "Atpakaļ uz ielogošanos"
+    },
+    "resetPassword": {
+      "title": "Atjaunot paroli",
+      "subtitle": "Ievadiet jauno paroli",
+      "password": "Jaunā parole",
+      "confirmPassword": "Apstiprināt jauno paroli",
+      "resetButton": "Atjaunot paroli",
+      "invalidToken": "Nederīga atjaunošanas saite",
+      "success": "Parole veiksmīgi atjaunināta!"
+    }
+  },
+  "dashboard": {
+    "customer": {
+      "title": "Klienta Panelis",
+      "welcome": "Laipni lūdzam atpakaļ!",
+      "subtitle": "Šeit jūs varat pārvaldīt savas rezervācijas un apskatīt aktivitāti.",
+      "stats": {
+        "totalBookings": "Kopējās rezervācijas",
+        "activeBookings": "Aktīvās rezervācijas",
+        "averageRating": "Vidējais vērtējums",
+        "totalSpent": "Kopējās izmaksas"
+      },
+      "recentBookings": "Pēdējās rezervācijas",
+      "viewAll": "Skatīt visas",
+      "quickActions": {
+        "bookService": "Rezervēt pakalpojumu",
+        "messages": "Ziņojumi",
+        "reviews": "Mani vērtējumi"
+      }
+    },
+    "provider": {
+      "title": "Sniedzēja Panelis",
+      "welcome": "Laipni lūdzam, sniedzēj!",
+      "subtitle": "Šeit jūs varat pārvaldīt savus pakalpojumus un rezervācijas.",
+      "stats": {
+        "totalServices": "Aktīvie pakalpojumi",
+        "activeBookings": "Aktīvās rezervācijas",
+        "averageRating": "Vidējais vērtējums",
+        "totalEarnings": "Kopējie ienākumi"
+      },
+      "recentBookings": "Pēdējās rezervācijas",
+      "recentServices": "Mani pakalpojumi",
+      "manageServices": "Pārvaldīt",
+      "quickActions": {
+        "manageServices": "Pārvaldīt pakalpojumus",
+        "bookings": "Rezervācijas",
+        "messages": "Ziņojumi"
+      }
+    }
+  },
+  "services": {
+    "title": "Pakalpojumi",
+    "subtitle": "Atrodiet uzticamus pakalpojumu sniedzējus savā apkārtnē",
+    "search": {
+      "placeholder": "Meklēt pakalpojumus...",
+      "button": "Meklēt"
+    },
+    "filters": {
+      "category": "Kategorija",
+      "subcategory": "Apakškategorija",
+      "priceRange": "Cena (€)",
+      "sortBy": "Kārtot pēc",
+      "allCategories": "Visas kategorijas",
+      "allSubcategories": "Visas apakškategorijas",
+      "min": "Min",
+      "max": "Max",
+      "sortOptions": {
+        "relevance": "Atbilstība",
+        "price_asc": "Cena (augošā)",
+        "price_desc": "Cena (dilstošā)",
+        "rating": "Vērtējums",
+        "newest": "Jaunākie"
+      }
+    },
+    "card": {
+      "from": "No",
+      "perHour": "/st",
+      "fixed": "fiksēta cena",
+      "negotiable": "pārrunājama",
+      "rating": "vērtējums",
+      "reviews": "atsauksmes",
+      "bookNow": "Rezervēt tagad",
+      "viewDetails": "Skatīt detaļas"
+    },
+    "noResults": {
+      "title": "Nav rezultātu",
+      "message": "Mēģiniet mainīt meklēšanas kritērijus"
+    }
+  },
+  "bookings": {
+    "title": "Rezervācijas",
+    "status": {
+      "pending": "Gaida apstiprinājumu",
+      "confirmed": "Apstiprināts",
+      "inProgress": "Tiek veikts",
+      "completed": "Pabeigts",
+      "cancelled": "Atcelts"
+    },
+    "actions": {
+      "confirm": "Apstiprināt",
+      "start": "Sākt",
+      "complete": "Pabeigt",
+      "cancel": "Atcelt"
+    },
+    "details": {
+      "service": "Pakalpojums",
+      "provider": "Sniedzējs",
+      "customer": "Klients",
+      "date": "Datums",
+      "time": "Laiks",
+      "address": "Adrese",
+      "price": "Cena",
+      "notes": "Piezīmes"
+    }
+  },
+  "reviews": {
+    "title": "Atsauksmes",
+    "writeReview": "Rakstīt atsauksmi",
+    "rating": "Vērtējums",
+    "comment": "Komentārs",
+    "submit": "Iesniegt",
+    "edit": "Rediģēt",
+    "delete": "Dzēst",
+    "reply": "Atbildēt",
+    "noReviews": "Nav atsauksmju"
+  },
+  "messages": {
+    "title": "Ziņojumi",
+    "conversations": "Sarunas",
+    "noConversations": "Nav sarunu",
+    "noMessages": "Nav ziņojumu",
+    "typeMessage": "Rakstiet ziņojumu...",
+    "send": "Sūtīt",
+    "online": "tiešsaistē",
+    "offline": "bezsaistē"
+  },
+  "profile": {
+    "title": "Profils",
+    "personalInfo": "Personīgā informācija",
+    "businessInfo": "Biznesa informācija",
+    "professionalInfo": "Profesionālā informācija",
+    "settings": "Iestatījumi",
+    "accountInfo": "Konta informācija",
+    "saveChanges": "Saglabāt izmaiņas",
+    "saving": "Saglabāšana...",
+    "saved": "Izmaiņas saglabātas!"
+  },
+  "landing": {
+    "hero": {
+      "title": "Visi Pakalpojumi Latvijā",
+      "subtitle": "Atrodiet uzticamus pakalpojumu sniedzējus savā apkārtnē",
+      "cta": "Sākt meklēt",
+      "secondaryCta": "Kļūt par sniedzēju"
+    },
+    "features": {
+      "title": "Kāpēc izvēlēties VisiPakalpojumi?",
+      "trusted": {
+        "title": "Uzticami sniedzēji",
+        "description": "Visi sniedzēji ir verificēti un ar labām atsauksmēm"
+      },
+      "secure": {
+        "title": "Drošs maksājums",
+        "description": "Aizsargāti maksājumi un garantēta kvalitāte"
+      },
+      "fast": {
+        "title": "Ātri un viegli",
+        "description": "Rezervējiet pakalpojumu dažos klikšķos"
+      }
+    },
+    "popularServices": {
+      "title": "Populārākie pakalpojumi",
+      "cleaning": "Mājas tīrīšana",
+      "repair": "Remonts",
+      "tutoring": "Mācības",
+      "gardening": "Dārza kopšana",
+      "moving": "Pārvākšanās",
+      "petCare": "Mājdzīvnieku kopšana"
+    }
+  },
+  "errors": {
+    "general": "Kaut kas nogāja greizi. Lūdzu mēģiniet vēlreiz.",
+    "network": "Tīkla kļūda. Pārbaudiet interneta savienojumu.",
+    "unauthorized": "Jums nav atļauts veikt šo darbību.",
+    "notFound": "Lapa nav atrasta.",
+    "serverError": "Servera kļūda. Lūdzu mēģiniet vēlreiz vēlāk."
+  },
+  "validation": {
+    "required": "Šis lauks ir obligāts",
+    "email": "Lūdzu ievadiet derīgu e-pasta adresi",
+    "minLength": "Minimālais garums ir {min} simboli",
+    "maxLength": "Maksimālais garums ir {max} simboli",
+    "passwordMatch": "Paroles nesakrīt",
+    "passwordStrength": "Parolei jābūt vismaz 8 simboli ar lielo un mazo burtu, kā arī ciparu"
+  }
+}
