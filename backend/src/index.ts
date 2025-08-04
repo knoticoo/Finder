@@ -27,17 +27,17 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env['FRONTEND_URL'] || 'http://localhost:3000',
     methods: ['GET', 'POST']
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env['PORT'] || 3001;
 
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: process.env['FRONTEND_URL'] || 'http://localhost:3000',
   credentials: true
 }));
 
@@ -57,19 +57,19 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(compression());
 
 // Logging middleware
-if (process.env.NODE_ENV === 'development') {
+if (process.env['NODE_ENV'] === 'development') {
   app.use(morgan('dev'));
 } else {
   app.use(morgan('combined'));
 }
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({
     status: 'OK',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
-    version: process.env.npm_package_version || '1.0.0'
+    environment: process.env['NODE_ENV'],
+    version: process.env['npm_package_version'] || '1.0.0'
   });
 });
 
@@ -116,7 +116,7 @@ const startServer = async () => {
     
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📊 Environment: ${process.env.NODE_ENV}`);
+      console.log(`📊 Environment: ${process.env['NODE_ENV']}`);
       console.log(`🔗 Health check: http://localhost:${PORT}/health`);
     });
   } catch (error) {
