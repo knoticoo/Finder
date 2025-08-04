@@ -33,22 +33,24 @@ print_error() {
 
 # Check if running as root
 if [[ $EUID -eq 0 ]]; then
-   print_error "This script should not be run as root"
+   print_status "Running as root - proceeding with installation"
+else
+   print_error "This script must be run as root"
    exit 1
 fi
 
 # Update system packages
 print_status "Updating system packages..."
-sudo apt update && sudo apt upgrade -y
+apt update && apt upgrade -y
 
 # Install essential packages
 print_status "Installing essential packages..."
-sudo apt install -y curl wget git unzip software-properties-common apt-transport-https ca-certificates gnupg lsb-release
+apt install -y curl wget git unzip software-properties-common apt-transport-https ca-certificates gnupg lsb-release
 
 # Install Node.js 20.x
 print_status "Installing Node.js 20.x..."
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt install -y nodejs
 
 # Verify Node.js installation
 NODE_VERSION=$(node --version)
@@ -57,48 +59,48 @@ print_success "Node.js $NODE_VERSION and npm $NPM_VERSION installed"
 
 # Install PostgreSQL 17
 print_status "Installing PostgreSQL 17..."
-sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-sudo apt update
-sudo apt install -y postgresql-17 postgresql-contrib-17
+sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+apt update
+apt install -y postgresql-17 postgresql-contrib-17
 
 # Start and enable PostgreSQL
 print_status "Starting PostgreSQL service..."
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
+systemctl start postgresql
+systemctl enable postgresql
 
 # Install Nginx
 print_status "Installing Nginx..."
-sudo apt install -y nginx
+apt install -y nginx
 
 # Start and enable Nginx
-sudo systemctl start nginx
-sudo systemctl enable nginx
+systemctl start nginx
+systemctl enable nginx
 
 # Install PM2 globally
 print_status "Installing PM2 process manager..."
-sudo npm install -g pm2
+npm install -g pm2
 
 # Install additional tools
 print_status "Installing additional tools..."
-sudo apt install -y net-tools htop tree
+apt install -y net-tools htop tree
 
 # Create application directory
 print_status "Creating application directory..."
-sudo mkdir -p /var/www/visipakalpojumi
-sudo chown $USER:$USER /var/www/visipakalpojumi
+mkdir -p /var/www/visipakalpojumi
+chown www-data:www-data /var/www/visipakalpojumi
 
 # Set up firewall
 print_status "Configuring firewall..."
-sudo ufw allow ssh
-sudo ufw allow 80
-sudo ufw allow 443
-sudo ufw allow 3001
-sudo ufw --force enable
+ufw allow ssh
+ufw allow 80
+ufw allow 443
+ufw allow 3001
+ufw --force enable
 
 # Install Certbot for SSL certificates
 print_status "Installing Certbot for SSL certificates..."
-sudo apt install -y certbot python3-certbot-nginx
+apt install -y certbot python3-certbot-nginx
 
 # Create environment file template
 print_status "Creating environment file template..."
@@ -135,6 +137,10 @@ RATE_LIMIT_MAX_REQUESTS=100
 LOG_LEVEL="info"
 EOF
 
+# Set proper permissions
+chown www-data:www-data /var/www/visipakalpojumi/.env.example
+chmod 644 /var/www/visipakalpojumi/.env.example
+
 print_success "Installation completed successfully!"
 echo ""
 echo "📋 Next steps:"
@@ -144,7 +150,7 @@ echo "3. Run the database setup script"
 echo "4. Start the application with ./start.sh"
 echo ""
 echo "🔧 Useful commands:"
-echo "- Check PostgreSQL status: sudo systemctl status postgresql"
-echo "- Check Nginx status: sudo systemctl status nginx"
+echo "- Check PostgreSQL status: systemctl status postgresql"
+echo "- Check Nginx status: systemctl status nginx"
 echo "- View logs: pm2 logs"
 echo "- Monitor processes: pm2 monit"
