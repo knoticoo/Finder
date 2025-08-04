@@ -165,3 +165,35 @@ export const validateMessage = [
     .withMessage('Message type must be TEXT, IMAGE, FILE, or SYSTEM'),
   handleValidationErrors
 ];
+
+// Subscription validation rules
+export const validateSubscription = [
+  body('planType')
+    .optional()
+    .isIn(['FREE', 'BASIC', 'PREMIUM', 'ENTERPRISE'])
+    .withMessage('Plan type must be FREE, BASIC, PREMIUM, or ENTERPRISE'),
+  body('status')
+    .optional()
+    .isIn(['ACTIVE', 'INACTIVE', 'CANCELLED', 'PAST_DUE', 'TRIAL'])
+    .withMessage('Status must be ACTIVE, INACTIVE, CANCELLED, PAST_DUE, or TRIAL'),
+  body('stripeCustomerId')
+    .optional()
+    .isString()
+    .withMessage('Invalid Stripe customer ID'),
+  body('stripeSubscriptionId')
+    .optional()
+    .isString()
+    .withMessage('Invalid Stripe subscription ID'),
+  handleValidationErrors
+];
+
+// Referral validation rules
+export const validateReferral = [
+  body('referralCode')
+    .notEmpty()
+    .withMessage('Referral code is required'),
+  body('referralCode')
+    .isLength({ min: 8, max: 8 })
+    .withMessage('Referral code must be exactly 8 characters'),
+  handleValidationErrors
+];
