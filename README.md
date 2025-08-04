@@ -216,6 +216,47 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
 ```
 
+## 📋 **TODO LIST**
+
+### **🔄 IN PROGRESS**
+- 🔄 **Payment Processing** - Stripe integration for secure payments
+  - Customer payment processing
+  - Provider payout system
+  - Subscription management
+  - Payment dispute handling
+
+### **📅 UPCOMING FEATURES**
+
+#### **💎 Premium Listings (Freemium for Providers)**
+- **Free Tier**: Basic service listings
+- **Premium Features**:
+  - Priority visibility (top search results)
+  - Highlighted profile (colored badge, "verified" status)
+  - Advanced analytics dashboard
+  - Priority customer support
+  - Featured in category pages
+  - Enhanced profile customization
+
+#### **⭐ Referral Program**
+- **Customer Referrals**:
+  - Users refer a friend = 1 month free premium
+  - Referral tracking and rewards
+  - Social sharing integration
+- **Provider Referrals**:
+  - Service providers refer another = boost visibility
+  - Referral commission system
+  - Provider network expansion
+
+#### **🔧 Additional Features**
+- **Advanced Reporting** - Detailed analytics and insights
+- **Mobile App** - Native iOS/Android applications
+- **AI-Powered Matching** - Smart service recommendations
+- **Advanced Scheduling** - Calendar integration and availability management
+- **Multi-language Content** - Service descriptions in multiple languages
+- **Advanced Security** - Two-factor authentication, fraud detection
+- **API Documentation** - Complete API documentation
+- **Testing Suite** - Comprehensive testing (unit, integration, e2e)
+
 ## 📊 **Monitoring**
 
 - **PM2** - Process monitoring

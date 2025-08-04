@@ -38,6 +38,12 @@ model User {
   providerBookings Booking[]        @relation("ProviderBookings")
   providerReviews  Review[]         @relation("ProviderReviews")
   services         Service[]
+  
+  // Premium and Payment fields
+  subscription     Subscription?
+  payments         Payment[]
+  referrerReferrals Referral[]      @relation("ReferrerReferrals")
+  referredReferrals Referral[]      @relation("ReferredReferrals")
 
   @@map("users")
 }
@@ -340,4 +346,104 @@ enum MessageType {
   IMAGE
   FILE
   SYSTEM
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  PAST_DUE
+  TRIAL
+}
+
+enum ReferralStatus {
+  PENDING
+  COMPLETED
+  EXPIRED
+  CANCELLED
+}
+
+enum ReferralRewardType {
+  PREMIUM_MONTH
+  VISIBILITY_BOOST
+  COMMISSION
+  DISCOUNT
+}
+
+// Premium and Payment Models
+model Subscription {
+  id                String   @id @default(cuid())
+  userId            String
+  planType          SubscriptionPlan @default(FREE)
+  status            SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId  String?
+  stripeSubscriptionId String?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd Boolean @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@index([userId])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+  @@map("subscriptions")
+}
+
+model Referral {
+  id              String   @id @default(cuid())
+  referrerId      String
+  referredId      String
+  referralCode    String   @unique
+  status          ReferralStatus @default(PENDING)
+  rewardType      ReferralRewardType
+  rewardAmount    Float?
+  rewardDescription String?
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  referrer User @relation("ReferrerReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred User @relation("ReferredReferrals", fields: [referredId], references: [id], onDelete: Cascade)
+
+  @@index([referrerId])
+  @@index([referredId])
+  @@index([referralCode])
+  @@map("referrals")
+}
+
+model Payment {
+  id                String   @id @default(cuid())
+  userId            String
+  bookingId         String?
+  subscriptionId    String?
+  amount            Float
+  currency          String   @default("EUR")
+  status            PaymentStatus @default(PENDING)
+  paymentMethod     PaymentMethod
+  stripePaymentIntentId String?
+  description       String?
+  metadata          Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  booking      Booking?     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([bookingId])
+  @@index([subscriptionId])
+  @@index([stripePaymentIntentId])
+  @@map("payments")
 }
