@@ -1,19 +1,25 @@
 import { Router } from 'express';
 import { authenticate, authorize } from '@/middleware/auth';
+import {
+  getAllServices,
+  getServiceById,
+  createService,
+  updateService,
+  deleteService,
+  getServiceCategories
+} from '@/controllers/serviceController';
+import { validateService } from '@/middleware/validation';
 
 const router = Router();
 
-// TODO: Implement service routes
-// - GET /api/services - List all services
-// - GET /api/services/:id - Get service details
-// - POST /api/services - Create new service (providers only)
-// - PUT /api/services/:id - Update service (owner only)
-// - DELETE /api/services/:id - Delete service (owner only)
-// - GET /api/services/search - Search services
-// - GET /api/services/categories - Get service categories
+// Public routes
+router.get('/', getAllServices);
+router.get('/categories', getServiceCategories);
+router.get('/:id', getServiceById);
 
-router.get('/', (req, res) => {
-  res.json({ message: 'Service routes - TODO: Implement' });
-});
+// Protected routes (providers only)
+router.post('/', authenticate, authorize('PROVIDER'), validateService, createService);
+router.put('/:id', authenticate, authorize('PROVIDER'), validateService, updateService);
+router.delete('/:id', authenticate, authorize('PROVIDER'), deleteService);
 
 export default router;

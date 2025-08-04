@@ -1,20 +1,29 @@
 import { Router } from 'express';
 import { authenticate, authorize } from '@/middleware/auth';
+import {
+  createBooking,
+  getUserBookings,
+  getProviderBookings,
+  getBookingById,
+  updateBookingStatus,
+  cancelBooking
+} from '@/controllers/bookingController';
+import { validateBooking } from '@/middleware/validation';
 
 const router = Router();
 
-// TODO: Implement booking routes
-// - GET /api/bookings - List user bookings
-// - GET /api/bookings/:id - Get booking details
-// - POST /api/bookings - Create new booking
-// - PUT /api/bookings/:id - Update booking status
-// - DELETE /api/bookings/:id - Cancel booking
-// - GET /api/bookings/provider - Provider bookings
-// - POST /api/bookings/:id/confirm - Confirm booking
-// - POST /api/bookings/:id/complete - Complete booking
+// All routes require authentication
+router.use(authenticate);
 
-router.get('/', (req, res) => {
-  res.json({ message: 'Booking routes - TODO: Implement' });
-});
+// Customer routes
+router.post('/', validateBooking, createBooking);
+router.get('/user', getUserBookings);
+router.get('/user/:id', getBookingById);
+router.put('/user/:id/cancel', cancelBooking);
+
+// Provider routes
+router.get('/provider', authorize('PROVIDER'), getProviderBookings);
+router.get('/provider/:id', authorize('PROVIDER'), getBookingById);
+router.put('/provider/:id/status', authorize('PROVIDER'), updateBookingStatus);
 
 export default router;

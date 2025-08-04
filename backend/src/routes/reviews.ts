@@ -1,19 +1,25 @@
 import { Router } from 'express';
 import { authenticate, authorize } from '@/middleware/auth';
+import {
+  createReview,
+  getServiceReviews,
+  getProviderReviews,
+  updateReview,
+  deleteReview,
+  respondToReview
+} from '@/controllers/reviewController';
+import { validateReview } from '@/middleware/validation';
 
 const router = Router();
 
-// TODO: Implement review routes
-// - GET /api/reviews - List reviews
-// - GET /api/reviews/:id - Get review details
-// - POST /api/reviews - Create new review
-// - PUT /api/reviews/:id - Update review
-// - DELETE /api/reviews/:id - Delete review
-// - GET /api/reviews/service/:serviceId - Get service reviews
-// - GET /api/reviews/provider/:providerId - Get provider reviews
+// Public routes
+router.get('/service/:serviceId', getServiceReviews);
+router.get('/provider/:providerId', getProviderReviews);
 
-router.get('/', (req, res) => {
-  res.json({ message: 'Review routes - TODO: Implement' });
-});
+// Protected routes
+router.post('/', authenticate, validateReview, createReview);
+router.put('/:id', authenticate, validateReview, updateReview);
+router.delete('/:id', authenticate, deleteReview);
+router.post('/:id/respond', authenticate, authorize('PROVIDER'), respondToReview);
 
 export default router;
