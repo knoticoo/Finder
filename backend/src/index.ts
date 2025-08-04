@@ -29,7 +29,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env['FRONTEND_URL'] || 'http://localhost:3000',
+    origin: process.env['NODE_ENV'] === 'production' ? '*' : (process.env['FRONTEND_URL'] || 'http://localhost:3000'),
     methods: ['GET', 'POST']
   }
 });
@@ -39,7 +39,7 @@ const PORT = process.env['PORT'] || 3001;
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env['FRONTEND_URL'] || 'http://localhost:3000',
+  origin: process.env['NODE_ENV'] === 'production' ? '*' : (process.env['FRONTEND_URL'] || 'http://localhost:3000'),
   credentials: true
 }));
 
@@ -118,10 +118,11 @@ const startServer = async () => {
     // Connect to database
     await connectDatabase();
     
-    server.listen(PORT, () => {
+    server.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📊 Environment: ${process.env['NODE_ENV']}`);
       console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+      console.log(`🌐 Public access: http://0.0.0.0:${PORT}/health`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
