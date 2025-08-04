@@ -31,7 +31,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         password: hashedPassword,
         firstName,
         lastName,
-        phone,
+        phone: phone || null,
         role: role || 'CUSTOMER',
         language: language || 'LATVIAN'
       },
@@ -167,7 +167,7 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
     }
 
     // Generate reset token (in production, use a proper token generation)
-    const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    // const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     
     // Store reset token in database (you might want to create a separate table for this)
     // For now, we'll just return success
@@ -188,9 +188,9 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
   }
 };
 
-export const confirmPasswordReset = async (req: Request, res: Response): Promise<void> => {
+export const confirmPasswordReset = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const { token, newPassword } = req.body;
+    // const { token, newPassword } = req.body;
 
     // TODO: Verify reset token and update password
     // For now, just return success
@@ -208,9 +208,9 @@ export const confirmPasswordReset = async (req: Request, res: Response): Promise
   }
 };
 
-export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
+export const verifyEmail = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const { token } = req.body;
+    // const { token } = req.body;
 
     // TODO: Verify email token and update user verification status
     // For now, just return success
@@ -228,7 +228,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const refreshToken = async (req: Request, res: Response): Promise<void> => {
+export const refreshToken = async (_req: Request, res: Response): Promise<void> => {
   try {
     // TODO: Implement token refresh logic
     res.status(200).json({

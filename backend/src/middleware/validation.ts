@@ -9,9 +9,9 @@ export const handleValidationErrors = (req: Request, res: Response, next: NextFu
       success: false,
       message: 'Validation failed',
       errors: errors.array().map(error => ({
-        field: error.param,
+        field: (error as any).param,
         message: error.msg,
-        value: error.value
+        value: (error as any).value
       }))
     });
     return;
@@ -41,7 +41,7 @@ export const validateRegister = [
     .withMessage('Last name must be between 2 and 50 characters'),
   body('phone')
     .optional()
-    .isMobilePhone()
+    .isMobilePhone('any')
     .withMessage('Please provide a valid phone number'),
   body('role')
     .optional()
