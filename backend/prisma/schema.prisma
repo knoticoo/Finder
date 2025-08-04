@@ -1,0 +1,343 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  phone     String?
+  avatar    String?
+  role      UserRole @default(CUSTOMER)
+  language  Language @default(LATVIAN)
+  isVerified Boolean @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Provider specific fields
+  providerProfile ProviderProfile?
+  
+  // Customer specific fields
+  bookings        Booking[]        @relation("CustomerBookings")
+  reviews         Review[]         @relation("CustomerReviews")
+  sentMessages    Message[]        @relation("SentMessages")
+  receivedMessages Message[]        @relation("ReceivedMessages")
+  
+  // Provider specific fields
+  providerBookings Booking[]        @relation("ProviderBookings")
+  providerReviews  Review[]         @relation("ProviderReviews")
+  services         Service[]
+
+  @@map("users")
+}
+
+model ProviderProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Business information
+  businessName String?
+  description  String?
+  address      String?
+  city         String?
+  postalCode   String?
+  
+  // Contact information
+  website      String?
+  socialMedia  Json? // Store social media links as JSON
+  
+  // Verification
+  isVerified   Boolean @default(false)
+  verificationDocuments String[] // Array of document URLs
+  
+  // Business hours
+  businessHours Json? // Store business hours as JSON
+  
+  // Insurance and certifications
+  hasInsurance Boolean @default(false)
+  insuranceDetails String?
+  certifications String[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("provider_profiles")
+}
+
+model ServiceCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  nameLv      String   // Latvian name
+  nameRu      String   // Russian name
+  nameEn      String   // English name
+  description String?
+  icon        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  services    Service[]
+  subcategories ServiceSubcategory[]
+
+  @@map("service_categories")
+}
+
+model ServiceSubcategory {
+  id          String   @id @default(cuid())
+  name        String
+  nameLv      String
+  nameRu      String
+  nameEn      String
+  description String?
+  categoryId  String
+  category    ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  services    Service[]
+
+  @@unique([name, categoryId])
+  @@map("service_subcategories")
+}
+
+model Service {
+  id              String   @id @default(cuid())
+  providerId      String
+  provider        User     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  categoryId      String
+  category        ServiceCategory @relation(fields: [categoryId], references: [id])
+  
+  subcategoryId   String?
+  subcategory     ServiceSubcategory? @relation(fields: [subcategoryId], references: [id])
+  
+  title           String
+  titleLv         String
+  titleRu         String
+  titleEn         String
+  
+  description     String
+  descriptionLv   String
+  descriptionRu   String
+  descriptionEn   String
+  
+  price           Decimal
+  priceType       PriceType
+  currency        Currency @default(EUR)
+  
+  // Location
+  serviceArea     String[] // Array of cities/areas where service is provided
+  travelFee       Decimal? // Additional fee for travel outside service area
+  
+  // Availability
+  isAvailable     Boolean  @default(true)
+  availability    Json?    // Store availability schedule as JSON
+  
+  // Media
+  images          String[] // Array of image URLs
+  videos          String[] // Array of video URLs
+  
+  // Ratings and reviews
+  averageRating   Decimal  @default(0)
+  totalReviews    Int      @default(0)
+  
+  // Verification
+  isVerified      Boolean  @default(false)
+  isFeatured      Boolean  @default(false)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  bookings        Booking[]
+  reviews         Review[]
+
+  @@map("services")
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  
+  // Customer and provider
+  customerId  String
+  customer    User          @relation("CustomerBookings", fields: [customerId], references: [id])
+  
+  providerId  String
+  provider    User          @relation("ProviderBookings", fields: [providerId], references: [id])
+  
+  serviceId   String
+  service     Service       @relation(fields: [serviceId], references: [id])
+  
+  // Booking details
+  scheduledDate DateTime
+  scheduledTime String?     // Time slot (e.g., "09:00-11:00")
+  duration     Int?         // Duration in minutes
+  address      String
+  city         String
+  postalCode   String?
+  notes        String?
+  
+  // Pricing
+  totalAmount  Decimal
+  currency     Currency     @default(EUR)
+  depositAmount Decimal?
+  
+  // Status
+  status       BookingStatus @default(PENDING)
+  
+  // Payment
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentMethod PaymentMethod?
+  transactionId String?
+  
+  // Cancellation
+  cancelledAt  DateTime?
+  cancellationReason String?
+  
+  // Completion
+  completedAt  DateTime?
+  completionNotes String?
+  
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  reviews      Review[]
+  messages     Message[]
+
+  @@map("bookings")
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  
+  // Customer and provider
+  customerId  String
+  customer    User     @relation("CustomerReviews", fields: [customerId], references: [id])
+  
+  providerId  String
+  provider    User     @relation("ProviderReviews", fields: [providerId], references: [id])
+  
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id])
+  
+  bookingId   String
+  booking     Booking  @relation(fields: [bookingId], references: [id])
+  
+  // Review content
+  rating      Int      // 1-5 stars
+  title       String?
+  comment     String?
+  images      String[] // Array of image URLs
+  
+  // Moderation
+  isVerified  Boolean  @default(false)
+  isApproved  Boolean  @default(true)
+  moderatedAt DateTime?
+  moderatorId String?
+  
+  // Provider response
+  providerResponse String?
+  responseDate DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([customerId, bookingId])
+  @@map("reviews")
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  
+  // Sender and receiver
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+  
+  receiverId  String
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  
+  bookingId   String?
+  booking     Booking? @relation(fields: [bookingId], references: [id])
+  
+  // Message content
+  content     String
+  messageType MessageType @default(TEXT)
+  attachments String[]    // Array of file URLs
+  
+  // Status
+  isRead      Boolean  @default(false)
+  readAt      DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("messages")
+}
+
+// Enums
+enum UserRole {
+  CUSTOMER
+  PROVIDER
+  ADMIN
+}
+
+enum Language {
+  LATVIAN
+  RUSSIAN
+  ENGLISH
+}
+
+enum PriceType {
+  FIXED
+  HOURLY
+  DAILY
+  NEGOTIABLE
+}
+
+enum Currency {
+  EUR
+  USD
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIALLY_PAID
+  REFUNDED
+  FAILED
+}
+
+enum PaymentMethod {
+  CARD
+  BANK_TRANSFER
+  CASH
+  PAYPAL
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
