@@ -22,7 +22,7 @@ router.get('/profile', getProfile);
 router.put('/profile', [
   body('firstName').optional().trim().isLength({ min: 2, max: 50 }),
   body('lastName').optional().trim().isLength({ min: 2, max: 50 }),
-  body('phone').optional().isMobilePhone(),
+  body('phone').optional().isMobilePhone('any'),
   body('language').optional().isIn(['LATVIAN', 'RUSSIAN', 'ENGLISH']),
   handleValidationErrors
 ], updateProfile);
