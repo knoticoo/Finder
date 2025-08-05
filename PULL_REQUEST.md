@@ -1,224 +1,105 @@
-# 🚀 **BUG FIX: Startup Script & Application Deployment**
+# Pull Request: Fix Startup Script Path Configuration and Database Setup
 
-## 📋 **Pull Request Overview**
+## 🚀 **Branch**: `cursor/start-and-configure-visipakalpojumi-web-application-c738`
 
-This PR fixes critical startup issues that were preventing the VisiPakalpojumi application from running properly in production.
+## 📋 **Summary**
+Fixed critical issues in the startup script that were preventing the VisiPakalpojumi web application from starting properly. The main issues were incorrect path configurations and missing database setup.
 
----
+## 🔧 **Changes Made**
 
-## ✅ **ISSUES FIXED**
+### 1. **Fixed Application Directory Path**
+- **Before**: Script was looking for application in `/workspace`
+- **After**: Updated to use correct path `/root/Finder`
+- **Files Modified**: `start.sh`
 
-### 🔧 **Startup Script Fixes**
+### 2. **Fixed Upload Directory Path**
+- **Before**: Uploads configured for `/var/www/visipakalpojumi/uploads/`
+- **After**: Updated to use `/root/Finder/uploads/`
+- **Files Modified**: `start.sh`
 
-#### **PM2 Configuration Error**
-- ✅ **Fixed**: Removed invalid `--out` option from PM2 command
-- ✅ **Fixed**: Updated to use `npm exec` instead of `npx` for better compatibility
-- ✅ **Fixed**: Added proper PATH configuration for Node.js when running as root
-- ✅ **Fixed**: Added TypeScript build step before starting the application
+### 3. **Fixed User Permissions**
+- **Before**: Script required root privileges and used `www-data` user
+- **After**: Made script work with both root and regular user accounts
+- **Files Modified**: `start.sh`
 
-#### **Database Connection Issues**
-- ✅ **Fixed**: PostgreSQL installation and configuration
-- ✅ **Fixed**: Database and user creation with proper permissions
-- ✅ **Fixed**: Prisma schema synchronization
+### 4. **Enhanced PM2 Configuration**
+- **Before**: PM2 startup failed due to `--uid` flag requiring root
+- **After**: Conditional PM2 startup based on user privileges
+- **Files Modified**: `start.sh`
 
-#### **Process Management**
-- ✅ **Fixed**: PM2 installation and configuration
-- ✅ **Fixed**: Proper process startup and monitoring
-- ✅ **Fixed**: Environment variable handling
+### 5. **Database Setup Instructions**
+- Added PostgreSQL installation and configuration
+- Created database `visipakalpojumi`
+- Created user `visipakalpojumi_user` with proper permissions
+- Fixed schema permissions for Prisma
 
----
+## 🐛 **Issues Fixed**
 
-## 🔧 **TECHNICAL CHANGES**
+1. **Startup Failure**: Application failed to start due to incorrect paths
+2. **Database Connection**: PostgreSQL not installed/configured
+3. **Permission Errors**: PM2 startup failed due to user privilege issues
+4. **Path Mismatch**: Script looking for files in wrong directories
 
-### **start.sh Script Updates**
+## ✅ **Testing**
 
-#### **Removed Invalid PM2 Option**
-```bash
-# Before (causing error)
-pm2 start "npx ts-node -r tsconfig-paths/register src/index.ts" \
-    --name "visipakalpojumi-backend" \
-    --cwd "$BACKEND_DIR" \
-    --env production \
-    --log "$APP_DIR/logs/backend.log" \
-    --error "$APP_DIR/logs/backend-error.log" \
-    --out "$APP_DIR/logs/backend-out.log" \  # ❌ Invalid option
-    --uid www-data
+- ✅ PostgreSQL database connection established
+- ✅ Prisma schema synchronization successful
+- ✅ Backend application starts successfully with PM2
+- ✅ All paths now correctly point to `/root/Finder`
+- ✅ Script works with both root and regular user accounts
 
-# After (fixed)
-pm2 start "npm run start" \
-    --name "visipakalpojumi-backend" \
-    --cwd "$BACKEND_DIR" \
-    --env production \
-    --log "$APP_DIR/logs/backend.log" \
-    --error "$APP_DIR/logs/backend-error.log" \
-    --uid www-data
-```
+## 📁 **Files Modified**
 
-#### **Added Node.js Path Configuration**
-```bash
-# Set PATH to include user's Node.js installation
-export PATH="/home/ubuntu/.nvm/versions/node/v22.16.0/bin:$PATH"
-```
+- `start.sh` - Main startup script with path and permission fixes
 
-#### **Added TypeScript Build Step**
-```bash
-# Build the TypeScript application
-print_status "Building TypeScript application..."
-npm run build
-```
+## 🚀 **How to Test**
 
-#### **Updated Database Commands**
-```bash
-# Before
-npx prisma db push --accept-data-loss
-npx prisma generate
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd Finder
+   ```
 
-# After
-npm exec prisma db push --accept-data-loss
-npm exec prisma generate
-```
+2. **Install PostgreSQL** (if not already installed)
+   ```bash
+   sudo apt update
+   sudo apt install -y postgresql postgresql-contrib
+   sudo service postgresql start
+   ```
 
----
+3. **Setup Database**
+   ```bash
+   sudo -u postgres psql -c "CREATE DATABASE visipakalpojumi;"
+   sudo -u postgres psql -c "CREATE USER visipakalpojumi_user WITH PASSWORD 'visipakalpojumi_password';"
+   sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE visipakalpojumi TO visipakalpojumi_user;"
+   sudo -u postgres psql -d visipakalpojumi -c "GRANT ALL ON SCHEMA public TO visipakalpojumi_user;"
+   ```
 
-## 🗄️ **DATABASE SETUP**
+4. **Run Startup Script**
+   ```bash
+   ./start.sh
+   ```
 
-### **PostgreSQL Installation & Configuration**
-```bash
-# Install PostgreSQL
-sudo apt update && sudo apt install -y postgresql postgresql-contrib
+5. **Verify Application**
+   ```bash
+   curl http://localhost:3001/health
+   pm2 status
+   ```
 
-# Start PostgreSQL service
-sudo service postgresql start
+## 🔄 **Deployment Impact**
 
-# Create database and user
-sudo -u postgres psql -c "CREATE DATABASE visipakalpojumi;"
-sudo -u postgres psql -c "CREATE USER visipakalpojumi_user WITH PASSWORD 'visipakalpojumi_password';"
-sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE visipakalpojumi TO visipakalpojumi_user;"
-sudo -u postgres psql -c "ALTER DATABASE visipakalpojumi OWNER TO visipakalpojumi_user;"
-```
+- **No breaking changes** - All existing functionality preserved
+- **Improved reliability** - Script now works in different environments
+- **Better error handling** - Clear error messages for common issues
+- **Flexible permissions** - Works with both root and regular users
 
-### **Environment Configuration**
-```env
-# Database Configuration
-DATABASE_URL="postgresql://visipakalpojumi_user:visipakalpojumi_password@localhost:5432/visipakalpojumi"
-```
+## 📝 **Additional Notes**
 
----
+- The script now properly handles the Ubuntu server environment
+- Database setup is documented for easy deployment
+- PM2 configuration is more robust
+- All paths are correctly configured for `/root/Finder` structure
 
-## 🧪 **TESTING RESULTS**
+## 🎯 **Ready for Review**
 
-### **Startup Process Verification**
-- ✅ **Database Connection**: PostgreSQL running and accessible
-- ✅ **Prisma Schema**: Database tables created successfully
-- ✅ **TypeScript Build**: Application compiles without errors
-- ✅ **PM2 Process**: Backend running with status "online"
-- ✅ **Health Check**: Application responding on port 3001
-
-### **Command Output Verification**
-```bash
-# Database connection successful
-Environment variables loaded from .env
-Prisma schema loaded from prisma/schema.prisma
-Datasource "db": PostgreSQL database "visipakalpojumi", schema "public" at "localhost:5432"
-
-The database is already in sync with the Prisma schema.
-
-✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 139ms
-
-# PM2 process running
-┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
-│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
-├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
-│ 0  │ visipakalpojumi-b… │ fork     │ 0    │ online    │ 0%       │ 32.8mb   │
-└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
-```
-
----
-
-## 🚀 **DEPLOYMENT INSTRUCTIONS**
-
-### **Quick Start**
-```bash
-# Clone repository
-git clone <repository-url>
-cd visipakalpojumi
-
-# Run startup script
-sudo ./start.sh
-```
-
-### **Manual Setup (if needed)**
-```bash
-# Install dependencies
-sudo apt update
-sudo apt install -y postgresql postgresql-contrib nodejs npm
-
-# Install PM2
-npm install -g pm2
-
-# Start PostgreSQL
-sudo service postgresql start
-
-# Run startup script
-sudo ./start.sh
-```
-
----
-
-## 📊 **PERFORMANCE IMPACT**
-
-- **Startup Time**: Reduced from failing to ~30 seconds
-- **Memory Usage**: ~32.8MB for backend process
-- **Database**: Fast connection and schema sync
-- **Reliability**: 100% startup success rate
-
----
-
-## 🔒 **SECURITY CONSIDERATIONS**
-
-- ✅ Database user with limited permissions
-- ✅ Environment variables properly configured
-- ✅ Process running with appropriate user permissions
-- ✅ Network access properly configured
-
----
-
-## 📝 **NEXT STEPS**
-
-1. **Nginx Configuration**
-   - Install and configure Nginx
-   - Set up reverse proxy to backend
-   - Configure SSL certificates
-
-2. **Frontend Deployment**
-   - Build and deploy frontend application
-   - Configure static file serving
-
-3. **Monitoring Setup**
-   - Set up application monitoring
-   - Configure log rotation
-   - Add health check endpoints
-
----
-
-## 🎯 **SUCCESS METRICS**
-
-- **Startup Success Rate**: 100% (was 0% before fixes)
-- **Database Connection**: Stable and reliable
-- **Application Uptime**: Backend running continuously
-- **Error Resolution**: All startup errors resolved
-
----
-
-**Ready for production deployment! 🚀**
-
-## 📋 **Files Changed**
-
-- `start.sh` - Fixed PM2 configuration and startup process
-- Database setup and configuration
-- Environment variable handling
-- Process management improvements
-
----
-
-**The application is now fully functional and ready for use! ✅**
+This pull request addresses the core startup issues and makes the application deployment-ready for the Ubuntu server environment.
