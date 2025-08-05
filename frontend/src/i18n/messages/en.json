@@ -1,0 +1,17 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "home": "Home",
+    "services": "Services",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Register"
+  },
+  "home": {
+    "title": "Find trusted service providers in Latvia",
+    "subtitle": "All services in one place - cleaning, repairs, education, and much more. Fast, safe and reliable.",
+    "findService": "Find service",
+    "becomeProvider": "Become a provider"
+  }
+}

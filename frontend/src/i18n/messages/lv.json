@@ -1,0 +1,17 @@
+{
+  "common": {
+    "welcome": "Laipni lūdzam",
+    "home": "Sākums",
+    "services": "Pakalpojumi",
+    "about": "Par mums",
+    "contact": "Kontakti",
+    "login": "Ieiet",
+    "register": "Reģistrēties"
+  },
+  "home": {
+    "title": "Atrodiet uzticamus pakalpojumu sniedzējus Latvijā",
+    "subtitle": "Vienā vietā visi pakalpojumi - tīrīšana, remonts, mācības, un daudz kas cits. Ātri, droši un uzticami.",
+    "findService": "Atrast pakalpojumu",
+    "becomeProvider": "Kļūt par sniedzēju"
+  }
+}
