@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getServiceCategories = exports.deleteService = exports.updateService = exports.createService = exports.getServiceById = exports.getAllServices = void 0;
-const database_1 = require("@/config/database");
+const database_1 = require("../config/database");
 const getAllServices = async (req, res) => {
     try {
         const { page = 1, limit = 10, category, search, minPrice, maxPrice, rating } = req.query;

@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",
-    "build": "tsc",
+    "build": "tsc && node fix-paths-after-build.js",
     "start": "node dist/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -72,13 +72,13 @@
     "node": ">=18.0.0"
   },
   "_moduleAliases": {
-    "@": "dist",
-    "@/config": "dist/config",
-    "@/controllers": "dist/controllers",
-    "@/models": "dist/models",
-    "@/routes": "dist/routes",
-    "@/middleware": "dist/middleware",
-    "@/utils": "dist/utils",
-    "@/types": "dist/types"
+    "@": "./dist",
+    "@/config": "./dist/config",
+    "@/controllers": "./dist/controllers",
+    "@/models": "./dist/models",
+    "@/routes": "./dist/routes",
+    "@/middleware": "./dist/middleware",
+    "@/utils": "./dist/utils",
+    "@/types": "./dist/types"
   }
 }

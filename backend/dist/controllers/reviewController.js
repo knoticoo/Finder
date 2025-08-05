@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.respondToReview = exports.deleteReview = exports.updateReview = exports.getProviderReviews = exports.getServiceReviews = exports.createReview = void 0;
-const database_1 = require("@/config/database");
+const database_1 = require("../config/database");
 const createReview = async (req, res) => {
     try {
         if (!req.user) {
