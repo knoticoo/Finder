@@ -68,12 +68,54 @@ kill_existing_processes() {
     # Kill any existing Node.js processes on our ports
     pkill -f "node.*3001" 2>/dev/null || true
     pkill -f "next.*3000" 2>/dev/null || true
+    pkill -f "next.*start" 2>/dev/null || true
+    pkill -f "next.*dev" 2>/dev/null || true
+    
+    # Kill any processes using our ports
+    lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+    lsof -ti:3001 | xargs kill -9 2>/dev/null || true
     
     # Kill PM2 processes
     pm2 stop visipakalpojumi-backend 2>/dev/null || true
     pm2 delete visipakalpojumi-backend 2>/dev/null || true
     
-    sleep 2
+    # Wait for processes to fully stop
+    sleep 3
+    
+    # Double-check ports are free
+    if lsof -i:3000 >/dev/null 2>&1; then
+        print_warning "Port 3000 still in use, forcing kill..."
+        lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+        sleep 1
+    fi
+    
+    if lsof -i:3001 >/dev/null 2>&1; then
+        print_warning "Port 3001 still in use, forcing kill..."
+        lsof -ti:3001 | xargs kill -9 2>/dev/null || true
+        sleep 1
+    fi
+    
+    print_success "All existing processes stopped"
+}
+
+# Function to check if ports are available
+check_ports() {
+    print_status "Checking if ports are available..."
+    
+    if lsof -i:3001 >/dev/null 2>&1; then
+        print_error "Port 3001 is still in use. Please check what's running on this port."
+        lsof -i:3001
+        return 1
+    fi
+    
+    if lsof -i:3000 >/dev/null 2>&1; then
+        print_error "Port 3000 is still in use. Please check what's running on this port."
+        lsof -i:3000
+        return 1
+    fi
+    
+    print_success "Ports 3000 and 3001 are available"
+    return 0
 }
 
 # Function to start backend
@@ -208,6 +250,12 @@ mkdir -p "$APP_DIR/logs"
 
 # Kill existing processes
 kill_existing_processes
+
+# Check if ports are available
+if ! check_ports; then
+    print_error "Ports are not available. Exiting."
+    exit 1
+fi
 
 # Start backend
 start_backend

@@ -2,3 +2,9 @@
 > frontend@0.1.0 start
 > next start -H 0.0.0.0
 
+   ▲ Next.js 15.4.5
+   - Local:        http://localhost:3000
+   - Network:      http://0.0.0.0:3000
+
+ ✓ Starting...
+ ✓ Ready in 260ms
