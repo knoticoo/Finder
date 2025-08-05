@@ -31,8 +31,8 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Application directory
-APP_DIR="/workspace"
+# Application directory - use current directory
+APP_DIR="$(pwd)"
 FRONTEND_DIR="$APP_DIR/frontend"
 
 # Check if frontend directory exists

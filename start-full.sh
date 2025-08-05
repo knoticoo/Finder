@@ -38,8 +38,8 @@ else
    print_status "Running as user - proceeding with startup"
 fi
 
-# Application directory
-APP_DIR="/workspace"
+# Application directory - use current directory
+APP_DIR="$(pwd)"
 BACKEND_DIR="$APP_DIR/backend"
 FRONTEND_DIR="$APP_DIR/frontend"
 
@@ -98,27 +98,13 @@ start_backend() {
     print_status "Building TypeScript application..."
     npm run build
     
-    # Check database connection and run migrations
-    print_status "Checking database connection..."
-    if npm exec prisma db push --accept-data-loss; then
-        print_success "Database schema updated"
-    else
-        print_error "Database connection failed"
-        print_status "Please check your DATABASE_URL in .env file"
-        exit 1
-    fi
+    # Skip database operations in development mode
+    print_status "Skipping database operations in development mode..."
     
-    # Start the backend application with PM2
-    print_status "Starting backend with PM2..."
-    pm2 start "npm run start" \
-        --name "visipakalpojumi-backend" \
-        --cwd "$BACKEND_DIR" \
-        --env production \
-        --log "$APP_DIR/logs/backend.log" \
-        --error "$APP_DIR/logs/backend-error.log"
-    
-    # Save PM2 configuration
-    pm2 save
+    # Start the backend application
+    print_status "Starting backend application..."
+    nohup npm start > "$APP_DIR/logs/backend.log" 2> "$APP_DIR/logs/backend-error.log" &
+    BACKEND_PID=$!
     
     # Wait for backend to start
     print_status "Waiting for backend to start..."
