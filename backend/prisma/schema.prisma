@@ -221,6 +221,7 @@ model Booking {
 
   reviews      Review[]
   messages     Message[]
+  payments     Payment[]
 
   @@map("bookings")
 }
@@ -380,7 +381,7 @@ enum ReferralRewardType {
 // Premium and Payment Models
 model Subscription {
   id                String   @id @default(cuid())
-  userId            String
+  userId            String   @unique
   planType          SubscriptionPlan @default(FREE)
   status            SubscriptionStatus @default(ACTIVE)
   stripeCustomerId  String?
