@@ -2,105 +2,10 @@
 > frontend@0.1.0 dev
 > next dev --turbopack
 
+ ⚠ Port 3000 is in use by an unknown process, using available port 3002 instead.
    ▲ Next.js 15.4.5 (Turbopack)
-   - Local:        http://localhost:3000
-   - Network:      http://172.30.0.2:3000
-   - Experiments (use with caution):
-     ✓ appDir
-
- ✓ Starting...
- ⚠ Invalid next.config.js options detected: 
- ⚠     Unrecognized key(s) in object: 'appDir' at "experimental"
- ⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
- ⨯ ./middleware.ts:2:1
-Module not found: Can't resolve './i18n'
-[0m [90m 1 |[39m [36mimport[39m createMiddleware [36mfrom[39m [32m'next-intl/middleware'[39m[33m;[39m
-[31m[1m>[22m[39m[90m 2 |[39m [36mimport[39m { locales[33m,[39m defaultLocale } [36mfrom[39m [32m'./i18n'[39m[33m;[39m
- [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 3 |[39m
- [90m 4 |[39m [36mexport[39m [36mdefault[39m createMiddleware({
- [90m 5 |[39m   [90m// A list of all locales that are supported[39m[0m
-
-
-
-https://nextjs.org/docs/messages/module-not-found
-
-
- ⨯ ./middleware.ts:2:1
-Module not found: Can't resolve './i18n'
-[0m [90m 1 |[39m [36mimport[39m createMiddleware [36mfrom[39m [32m'next-intl/middleware'[39m[33m;[39m
-[31m[1m>[22m[39m[90m 2 |[39m [36mimport[39m { locales[33m,[39m defaultLocale } [36mfrom[39m [32m'./i18n'[39m[33m;[39m
- [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 3 |[39m
- [90m 4 |[39m [36mexport[39m [36mdefault[39m createMiddleware({
- [90m 5 |[39m   [90m// A list of all locales that are supported[39m[0m
-
-
-
-https://nextjs.org/docs/messages/module-not-found
-
-
- ⨯ ./middleware.ts:2:1
-Module not found: Can't resolve './i18n'
-[0m [90m 1 |[39m [36mimport[39m createMiddleware [36mfrom[39m [32m'next-intl/middleware'[39m[33m;[39m
-[31m[1m>[22m[39m[90m 2 |[39m [36mimport[39m { locales[33m,[39m defaultLocale } [36mfrom[39m [32m'./i18n'[39m[33m;[39m
- [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 3 |[39m
- [90m 4 |[39m [36mexport[39m [36mdefault[39m createMiddleware({
- [90m 5 |[39m   [90m// A list of all locales that are supported[39m[0m
-
-
-
-https://nextjs.org/docs/messages/module-not-found
-
-
- ✓ Compiled middleware in 197ms
- ✓ Ready in 1085ms
- ⚠ Webpack is configured while Turbopack is not, which may cause problems.
- ⚠ See instructions if you need to configure Turbopack:
-  https://nextjs.org/docs/app/api-reference/next-config-js/turbopack
-
- ○ Compiling / ...
- ✓ Compiled / in 2.6s
- ⚠ Unsupported metadata viewport is configured in metadata export in /. Please move it to viewport export instead.
-Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
- ⚠ Unsupported metadata themeColor is configured in metadata export in /. Please move it to viewport export instead.
-Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
- GET / 200 in 2913ms
- ⚠ Unsupported metadata viewport is configured in metadata export in /. Please move it to viewport export instead.
-Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
- ⚠ Unsupported metadata themeColor is configured in metadata export in /. Please move it to viewport export instead.
-Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
- GET / 200 in 71ms
- ⚠ Unsupported metadata viewport is configured in metadata export in /. Please move it to viewport export instead.
-Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
- ⚠ Unsupported metadata themeColor is configured in metadata export in /. Please move it to viewport export instead.
-Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
- GET / 200 in 77ms
- ⨯ ./src/i18n/request.ts:13:22
-Module not found: Can't resolve './messages/' <dynamic> '.json'
-[0m [90m 11 |[39m
- [90m 12 |[39m   [36mreturn[39m {
-[31m[1m>[22m[39m[90m 13 |[39m     messages[33m:[39m ([36mawait[39m [36mimport[39m([32m`./messages/${locale}.json`[39m))[33m.[39m[36mdefault[39m
- [90m    |[39m                      [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 14 |[39m   }[33m;[39m
- [90m 15 |[39m })[33m;[39m[0m
-
-
-
-Import trace:
-  ./src/i18n/request.ts
-  ./middleware.ts
-
-https://nextjs.org/docs/messages/module-not-found
-
-
- ✓ Compiled middleware in 8ms
- ✓ Compiled in 137ms
- ⚠ Found a change in next.config.js. Restarting the server to apply the changes...
-   ▲ Next.js 15.4.5 (Turbopack)
-   - Local:        http://localhost:3000
-   - Network:      http://172.30.0.2:3000
+   - Local:        http://localhost:3002
+   - Network:      http://172.30.0.2:3002
 
  ✓ Starting...
  ⨯ ./src/i18n/request.ts:13:22
@@ -121,10 +26,9 @@ Import trace:
 https://nextjs.org/docs/messages/module-not-found
 
 
- ✓ Compiled middleware in 198ms
- ✓ Ready in 1215ms
+ ✓ Compiled middleware in 257ms
+ ✓ Ready in 1290ms
  ⚠ Webpack is configured while Turbopack is not, which may cause problems.
  ⚠ See instructions if you need to configure Turbopack:
   https://nextjs.org/docs/app/api-reference/next-config-js/turbopack
 
-[?25h
