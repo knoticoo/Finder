@@ -39,7 +39,7 @@ else
 fi
 
 # Application directory
-APP_DIR="/root/Finder"
+APP_DIR="/workspace"
 BACKEND_DIR="$APP_DIR/backend"
 FRONTEND_DIR="$APP_DIR/frontend"
 
