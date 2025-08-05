@@ -6,7 +6,7 @@ import {
   ChatBubbleLeftRightIcon,
   CalendarIcon,
   UserIcon,
-  ReplyIcon,
+  ArrowUturnLeftIcon,
   EyeIcon,
   ChartBarIcon
 } from '@heroicons/react/24/outline'
