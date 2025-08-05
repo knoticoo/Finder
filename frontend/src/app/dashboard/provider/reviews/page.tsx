@@ -260,7 +260,7 @@ export default function ProviderReviewsPage() {
                         }}
                         className="inline-flex items-center px-3 py-2 border border-blue-300 rounded-md text-sm font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <ReplyIcon className="h-4 w-4 mr-1" />
+                        <ArrowUturnLeftIcon className="h-4 w-4 mr-1" />
                         Atbildēt
                       </button>
                     )}
