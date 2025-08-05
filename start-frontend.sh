@@ -65,10 +65,13 @@ start_frontend() {
         npm install
     fi
     
-    # Start the frontend development server
-    print_status "Starting Next.js development server..."
+    # Build and start the frontend production server
+    print_status "Building Next.js production build..."
     export PATH="/home/ubuntu/.nvm/versions/node/v22.16.0/bin:$PATH"
-    nohup npm run dev > "$APP_DIR/logs/frontend.log" 2>&1 &
+    npm run build
+    
+    print_status "Starting Next.js standalone server..."
+    nohup node .next/standalone/server.js > "$APP_DIR/logs/frontend.log" 2>&1 &
     FRONTEND_PID=$!
     
     # Wait for frontend to start
