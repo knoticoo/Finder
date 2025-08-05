@@ -1,105 +1,130 @@
-# Pull Request: Fix Startup Script Path Configuration and Database Setup
+# 🚀 Fix Frontend Dashboard Startup Issue
 
-## 🚀 **Branch**: `cursor/start-and-configure-visipakalpojumi-web-application-c738`
+## 📋 Summary
 
-## 📋 **Summary**
-Fixed critical issues in the startup script that were preventing the VisiPakalpojumi web application from starting properly. The main issues were incorrect path configurations and missing database setup.
+This PR fixes the critical issue where users were seeing JSON API responses instead of the VisiPakalpojumi dashboard website. The frontend dashboard is now properly accessible at `http://localhost:3000`.
 
-## 🔧 **Changes Made**
+## 🐛 Problem
 
-### 1. **Fixed Application Directory Path**
-- **Before**: Script was looking for application in `/workspace`
-- **After**: Updated to use correct path `/root/Finder`
-- **Files Modified**: `start.sh`
+- Users were accessing the backend API (port 3001) which returns JSON instead of the dashboard
+- The `./start.sh` script only started the backend, not the frontend
+- Frontend Next.js application failed to start due to i18n configuration issues
+- No clear way to start the frontend dashboard independently
 
-### 2. **Fixed Upload Directory Path**
-- **Before**: Uploads configured for `/var/www/visipakalpojumi/uploads/`
-- **After**: Updated to use `/root/Finder/uploads/`
-- **Files Modified**: `start.sh`
+## ✅ Solution
 
-### 3. **Fixed User Permissions**
-- **Before**: Script required root privileges and used `www-data` user
-- **After**: Made script work with both root and regular user accounts
-- **Files Modified**: `start.sh`
+### 1. Fixed Frontend Startup Issues
+- **Moved i18n configuration** from `frontend/i18n.ts` to `frontend/src/i18n/request.ts` (correct location for next-intl)
+- **Temporarily disabled next-intl plugin** in `frontend/next.config.js` to resolve startup errors
+- **Fixed Next.js development server** to start successfully
 
-### 4. **Enhanced PM2 Configuration**
-- **Before**: PM2 startup failed due to `--uid` flag requiring root
-- **After**: Conditional PM2 startup based on user privileges
-- **Files Modified**: `start.sh`
+### 2. Created New Startup Scripts
+- **`start-frontend.sh`** - Starts only the frontend dashboard (no database required)
+- **`start-full.sh`** - Starts both backend and frontend (requires database)
+- **Enhanced error handling** and colored output for better user experience
 
-### 5. **Database Setup Instructions**
-- Added PostgreSQL installation and configuration
-- Created database `visipakalpojumi`
-- Created user `visipakalpojumi_user` with proper permissions
-- Fixed schema permissions for Prisma
+### 3. Improved User Experience
+- **Clear instructions** on which URL to access (`http://localhost:3000`)
+- **Comprehensive logging** for troubleshooting
+- **Process management** with proper cleanup
 
-## 🐛 **Issues Fixed**
+## 🔧 Changes Made
 
-1. **Startup Failure**: Application failed to start due to incorrect paths
-2. **Database Connection**: PostgreSQL not installed/configured
-3. **Permission Errors**: PM2 startup failed due to user privilege issues
-4. **Path Mismatch**: Script looking for files in wrong directories
+### Files Modified:
+- `frontend/next.config.js` - Temporarily disabled next-intl plugin
+- `frontend/src/i18n/request.ts` - Moved from root i18n.ts
 
-## ✅ **Testing**
+### Files Added:
+- `start-frontend.sh` - Frontend-only startup script
+- `start-full.sh` - Complete application startup script
+- `logs/frontend.log` - Frontend application logs
 
-- ✅ PostgreSQL database connection established
-- ✅ Prisma schema synchronization successful
-- ✅ Backend application starts successfully with PM2
-- ✅ All paths now correctly point to `/root/Finder`
-- ✅ Script works with both root and regular user accounts
+## 🎯 How to Test
 
-## 📁 **Files Modified**
-
-- `start.sh` - Main startup script with path and permission fixes
-
-## 🚀 **How to Test**
-
-1. **Clone the repository**
+1. **Start the frontend dashboard:**
    ```bash
-   git clone <repository-url>
-   cd Finder
+   ./start-frontend.sh
    ```
 
-2. **Install PostgreSQL** (if not already installed)
-   ```bash
-   sudo apt update
-   sudo apt install -y postgresql postgresql-contrib
-   sudo service postgresql start
+2. **Open your browser and go to:**
+   ```
+   http://localhost:3000
    ```
 
-3. **Setup Database**
-   ```bash
-   sudo -u postgres psql -c "CREATE DATABASE visipakalpojumi;"
-   sudo -u postgres psql -c "CREATE USER visipakalpojumi_user WITH PASSWORD 'visipakalpojumi_password';"
-   sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE visipakalpojumi TO visipakalpojumi_user;"
-   sudo -u postgres psql -d visipakalpojumi -c "GRANT ALL ON SCHEMA public TO visipakalpojumi_user;"
-   ```
+3. **You should see the VisiPakalpojumi dashboard** with:
+   - Navigation menu
+   - Hero section with "Atrodiet uzticamus pakalpojumu sniedzējus Latvijā"
+   - Features section
+   - Popular services (cleaning, repair, education)
+   - Call-to-action for service providers
+   - Footer
 
-4. **Run Startup Script**
-   ```bash
-   ./start.sh
-   ```
+## 📊 Before vs After
 
-5. **Verify Application**
-   ```bash
-   curl http://localhost:3001/health
-   pm2 status
-   ```
+### Before:
+- ❌ Users saw JSON API response: `{"message":"Welcome to Finder API",...}`
+- ❌ No clear way to start frontend
+- ❌ Frontend startup errors due to i18n configuration
 
-## 🔄 **Deployment Impact**
+### After:
+- ✅ Users see beautiful VisiPakalpojumi dashboard
+- ✅ Clear startup scripts with instructions
+- ✅ Frontend starts successfully
+- ✅ Proper error handling and logging
 
-- **No breaking changes** - All existing functionality preserved
-- **Improved reliability** - Script now works in different environments
-- **Better error handling** - Clear error messages for common issues
-- **Flexible permissions** - Works with both root and regular users
+## 🚀 Usage Instructions
 
-## 📝 **Additional Notes**
+### Quick Start (Frontend Only):
+```bash
+./start-frontend.sh
+# Then open http://localhost:3000
+```
 
-- The script now properly handles the Ubuntu server environment
-- Database setup is documented for easy deployment
-- PM2 configuration is more robust
-- All paths are correctly configured for `/root/Finder` structure
+### Complete Application (Backend + Frontend):
+```bash
+./start-full.sh
+# Requires database setup
+```
 
-## 🎯 **Ready for Review**
+### Useful Commands:
+```bash
+# View frontend logs
+tail -f logs/frontend.log
 
-This pull request addresses the core startup issues and makes the application deployment-ready for the Ubuntu server environment.
+# Stop frontend
+pkill -f 'next.*3000'
+
+# Monitor processes
+pm2 status
+```
+
+## 🔍 Technical Details
+
+### Frontend Configuration Changes:
+- **next-intl plugin temporarily disabled** to resolve startup issues
+- **i18n configuration moved** to correct location for next-intl
+- **Development server** now starts on port 3000
+
+### Startup Scripts Features:
+- **Colored output** for better readability
+- **Process management** with proper cleanup
+- **Health checks** to verify services are running
+- **Comprehensive error handling**
+- **Clear user instructions**
+
+## 📝 Notes
+
+- The next-intl plugin is temporarily disabled but can be re-enabled once the i18n configuration is fully resolved
+- The frontend works independently without the backend for viewing the dashboard
+- Backend functionality requires database setup (PostgreSQL)
+- All changes are backward compatible
+
+## 🎉 Result
+
+Users can now successfully access the VisiPakalpojumi dashboard at `http://localhost:3000` and see the beautiful website instead of JSON API responses.
+
+---
+
+**Branch:** `fix/frontend-dashboard-startup-issue`  
+**Target:** `main`  
+**Type:** Bug Fix + Enhancement
