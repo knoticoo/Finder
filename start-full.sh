@@ -217,12 +217,12 @@ start_frontend() {
     if curl -s http://localhost:3000 > /dev/null; then
         print_success "Frontend application is running on port 3000"
         print_status "Testing frontend response..."
-        FRONTEND_RESPONSE=$(curl -s http://localhost:3000 | head -c 200)
+        FRONTEND_RESPONSE=$(curl -s http://localhost:3000)
         if echo "$FRONTEND_RESPONSE" | grep -q "VisiPakalpojumi"; then
             print_success "Frontend dashboard is loading correctly"
         else
             print_warning "Frontend is running but may not be loading correctly"
-            print_status "Response preview: $FRONTEND_RESPONSE"
+            print_status "Response preview: $(echo "$FRONTEND_RESPONSE" | head -c 200)"
         fi
         
         # Check external IP access
