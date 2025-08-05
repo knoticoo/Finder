@@ -1,0 +1,11 @@
+--2025-08-04 19:30:55--  https://www.postgresql.org/media/keys/ACCC4CF8.asc
+Resolving www.postgresql.org (www.postgresql.org)... 72.32.157.230, 217.196.149.50, 87.238.57.232, ...
+Connecting to www.postgresql.org (www.postgresql.org)|72.32.157.230|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 4812 (4.7K) [application/octet-stream]
+Saving to: ‘STDOUT’
+
+-                     0%[                    ]       0  --.-KB/s               -                   100%[===================>]   4.70K  --.-KB/s    in 0s      
+
+2025-08-04 19:30:55 (3.63 GB/s) - written to stdout [4812/4812]
+
