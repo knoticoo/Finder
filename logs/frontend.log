@@ -1,40 +1,4 @@
 
-> frontend@0.1.0 dev
-> next dev --turbopack
+> frontend@0.1.0 start
+> next start -H 0.0.0.0
 
- ⚠ Port 3000 is in use by an unknown process, using available port 3003 instead.
-   ▲ Next.js 15.4.5 (Turbopack)
-   - Local:        http://localhost:3003
-   - Network:      http://172.30.0.2:3003
-
- ✓ Starting...
- ⨯ ./src/i18n/request.ts:13:22
-Module not found: Can't resolve './messages/' <dynamic> '.json'
-[0m [90m 11 |[39m
- [90m 12 |[39m   [36mreturn[39m {
-[31m[1m>[22m[39m[90m 13 |[39m     messages[33m:[39m ([36mawait[39m [36mimport[39m([32m`./messages/${locale}.json`[39m))[33m.[39m[36mdefault[39m
- [90m    |[39m                      [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 14 |[39m   }[33m;[39m
- [90m 15 |[39m })[33m;[39m[0m
-
-
-
-Import trace:
-  ./src/i18n/request.ts
-  ./middleware.ts
-
-https://nextjs.org/docs/messages/module-not-found
-
-
- ✓ Compiled middleware in 224ms
- ✓ Ready in 1144ms
- ⚠ Webpack is configured while Turbopack is not, which may cause problems.
- ⚠ See instructions if you need to configure Turbopack:
-  https://nextjs.org/docs/app/api-reference/next-config-js/turbopack
-
- ✓ Compiled middleware in 3ms
-  ✓ Compiled middlewa ✓ Compi ✓ Compiled in 34ms
- ✓ Compiled middlewa ✓ Compi ✓ Compiled in 28ms
-[?25h
-mpiled in 26ms
-[?25h
