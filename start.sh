@@ -35,8 +35,7 @@ print_error() {
 if [[ $EUID -eq 0 ]]; then
    print_status "Running as root - proceeding with startup"
 else
-   print_error "This script must be run as root"
-   exit 1
+   print_status "Running as user - proceeding with startup"
 fi
 
 # Application directory
@@ -61,7 +60,7 @@ if [ ! -f "$BACKEND_DIR/.env" ]; then
     print_warning ".env file not found. Creating from template..."
     if [ -f "$BACKEND_DIR/.env.example" ]; then
         cp "$BACKEND_DIR/.env.example" "$BACKEND_DIR/.env"
-        chown www-data:www-data "$BACKEND_DIR/.env"
+        chown ubuntu:ubuntu "$BACKEND_DIR/.env"
         print_status "Please edit $BACKEND_DIR/.env with your configuration"
     else
         print_error "No .env.example file found"
@@ -108,17 +107,26 @@ pm2 delete visipakalpojumi-backend 2>/dev/null || true
 
 # Create logs directory if it doesn't exist
 mkdir -p "$APP_DIR/logs"
-chown www-data:www-data "$APP_DIR/logs"
+chown ubuntu:ubuntu "$APP_DIR/logs"
 
 # Start the backend application with PM2
 print_status "Starting backend application..."
-pm2 start "npm run start" \
-    --name "visipakalpojumi-backend" \
-    --cwd "$BACKEND_DIR" \
-    --env production \
-    --log "$APP_DIR/logs/backend.log" \
-    --error "$APP_DIR/logs/backend-error.log" \
-    --uid www-data
+if [[ $EUID -eq 0 ]]; then
+    pm2 start "npm run start" \
+        --name "visipakalpojumi-backend" \
+        --cwd "$BACKEND_DIR" \
+        --env production \
+        --log "$APP_DIR/logs/backend.log" \
+        --error "$APP_DIR/logs/backend-error.log" \
+        --uid ubuntu
+else
+    pm2 start "npm run start" \
+        --name "visipakalpojumi-backend" \
+        --cwd "$BACKEND_DIR" \
+        --env production \
+        --log "$APP_DIR/logs/backend.log" \
+        --error "$APP_DIR/logs/backend-error.log"
+fi
 
 # Save PM2 configuration
 pm2 save
@@ -189,7 +197,7 @@ server {
 
     # Upload files
     location /uploads/ {
-        alias /var/www/visipakalpojumi/uploads/;
+        alias /workspace/uploads/;
         expires 1y;
         add_header Cache-Control "public";
     }
@@ -267,7 +275,7 @@ server {
 #
 #     # Upload files
 #     location /uploads/ {
-#         alias /var/www/visipakalpojumi/uploads/;
+#         alias /workspace/uploads/;
 #         expires 1y;
 #         add_header Cache-Control "public";
 #     }
@@ -290,7 +298,7 @@ fi
 # Create uploads directory
 mkdir -p "$APP_DIR/uploads"
 chmod 755 "$APP_DIR/uploads"
-chown www-data:www-data "$APP_DIR/uploads"
+chown ubuntu:ubuntu "$APP_DIR/uploads"
 
 # Wait for application to start
 print_status "Waiting for application to start..."
