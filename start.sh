@@ -39,7 +39,7 @@ else
 fi
 
 # Application directory
-APP_DIR="/workspace"
+APP_DIR="/root/Finder"
 BACKEND_DIR="$APP_DIR/backend"
 
 # Check if application directory exists
@@ -197,7 +197,7 @@ server {
 
     # Upload files
     location /uploads/ {
-        alias /workspace/uploads/;
+        alias /root/Finder/uploads/;
         expires 1y;
         add_header Cache-Control "public";
     }
@@ -275,7 +275,7 @@ server {
 #
 #     # Upload files
 #     location /uploads/ {
-#         alias /workspace/uploads/;
+#         alias /root/Finder/uploads/;
 #         expires 1y;
 #         add_header Cache-Control "public";
 #     }
