@@ -204,8 +204,8 @@ start_frontend() {
     
     # Start the frontend production server
     print_status "Starting Next.js production server..."
-    # Start with host binding to allow external access
-    nohup npm start -- -H 0.0.0.0 > "$APP_DIR/logs/frontend.log" 2> "$APP_DIR/logs/frontend-error.log" &
+    # Start with host binding to allow external access on port 3000
+    nohup npm start -- -H 0.0.0.0 -p 3000 > "$APP_DIR/logs/frontend.log" 2> "$APP_DIR/logs/frontend-error.log" &
     FRONTEND_PID=$!
     
     # Wait for frontend to start

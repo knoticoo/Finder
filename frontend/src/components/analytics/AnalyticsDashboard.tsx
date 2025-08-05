@@ -8,8 +8,8 @@ import {
   UsersIcon,
   StarIcon,
   CalendarIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   EyeIcon,
   ClockIcon,
   MapPinIcon,
@@ -131,9 +131,9 @@ export default function AnalyticsDashboard({ userId, timeRange }: AnalyticsDashb
 
   const getTrendIcon = (current: number, previous: number) => {
     if (current > previous) {
-      return <TrendingUpIcon className="h-4 w-4 text-green-500" />
+      return <ArrowTrendingUpIcon className="h-4 w-4 text-green-500" />
     } else if (current < previous) {
-      return <TrendingDownIcon className="h-4 w-4 text-red-500" />
+      return <ArrowTrendingDownIcon className="h-4 w-4 text-red-500" />
     }
     return null
   }

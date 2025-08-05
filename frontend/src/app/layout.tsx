@@ -12,9 +12,7 @@ export const metadata: Metadata = {
   description: 'Atrodiet uzticamus pakalpojumu sniedzējus Latvijā - tīrīšana, remonts, mācības un daudz kas cits.',
   keywords: 'pakalpojumi, Latvija, tīrīšana, remonts, mācības, handyman, services',
   authors: [{ name: 'VisiPakalpojumi Team' }],
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
   robots: 'index, follow',
-  themeColor: '#2563eb',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -45,6 +43,14 @@ export const metadata: Metadata = {
       { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#2563eb',
 }
 
 export default function RootLayout({
