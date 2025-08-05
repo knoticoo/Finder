@@ -65,6 +65,27 @@ if (process.env['NODE_ENV'] === 'development') {
   app.use(morgan('combined'));
 }
 
+// Root endpoint
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    message: 'Welcome to Finder API',
+    version: process.env['npm_package_version'] || '1.0.0',
+    environment: process.env['NODE_ENV'],
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: '/health',
+      auth: '/api/auth',
+      users: '/api/users',
+      services: '/api/services',
+      bookings: '/api/bookings',
+      reviews: '/api/reviews',
+      messages: '/api/messages',
+      subscriptions: '/api/subscriptions',
+      referrals: '/api/referrals'
+    }
+  });
+});
+
 // Health check endpoint
 app.get('/health', (_req, res) => {
   res.status(200).json({
