@@ -40,7 +40,7 @@ else
 fi
 
 # Application directory
-APP_DIR="/var/www/visipakalpojumi"
+APP_DIR="/workspace"
 BACKEND_DIR="$APP_DIR/backend"
 
 # Check if application directory exists
@@ -72,6 +72,9 @@ fi
 # Navigate to backend directory
 cd "$BACKEND_DIR"
 
+# Set PATH to include user's Node.js installation
+export PATH="/home/ubuntu/.nvm/versions/node/v22.16.0/bin:$PATH"
+
 # Check if node_modules exists
 if [ ! -d "node_modules" ]; then
     print_status "Installing Node.js dependencies..."
@@ -81,12 +84,16 @@ fi
 # Check if Prisma client is generated
 if [ ! -d "node_modules/.prisma" ]; then
     print_status "Generating Prisma client..."
-    npx prisma generate
+    npm exec prisma generate
 fi
+
+# Build the TypeScript application
+print_status "Building TypeScript application..."
+npm run build
 
 # Check database connection and run migrations
 print_status "Checking database connection..."
-if npx prisma db push --accept-data-loss; then
+if npm exec prisma db push --accept-data-loss; then
     print_success "Database schema updated"
 else
     print_error "Database connection failed"
@@ -105,13 +112,12 @@ chown www-data:www-data "$APP_DIR/logs"
 
 # Start the backend application with PM2
 print_status "Starting backend application..."
-pm2 start "npx ts-node -r tsconfig-paths/register src/index.ts" \
+pm2 start "npm run start" \
     --name "visipakalpojumi-backend" \
     --cwd "$BACKEND_DIR" \
     --env production \
     --log "$APP_DIR/logs/backend.log" \
     --error "$APP_DIR/logs/backend-error.log" \
-    --out "$APP_DIR/logs/backend-out.log" \
     --uid www-data
 
 # Save PM2 configuration
