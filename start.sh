@@ -40,7 +40,7 @@ else
 fi
 
 # Application directory
-APP_DIR="/var/www/visipakalpojumi"
+APP_DIR="/workspace"
 BACKEND_DIR="$APP_DIR/backend"
 
 # Check if application directory exists
