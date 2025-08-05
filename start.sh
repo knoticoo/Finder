@@ -111,7 +111,6 @@ pm2 start "npx ts-node -r tsconfig-paths/register src/index.ts" \
     --env production \
     --log "$APP_DIR/logs/backend.log" \
     --error "$APP_DIR/logs/backend-error.log" \
-    --out "$APP_DIR/logs/backend-out.log" \
     --uid www-data
 
 # Save PM2 configuration
