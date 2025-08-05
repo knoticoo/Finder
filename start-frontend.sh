@@ -32,7 +32,7 @@ print_error() {
 }
 
 # Application directory
-APP_DIR="/workspace"
+APP_DIR="/root/Finder"
 FRONTEND_DIR="$APP_DIR/frontend"
 
 # Check if frontend directory exists
