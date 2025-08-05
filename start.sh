@@ -87,6 +87,10 @@ if [ ! -d "node_modules/.prisma" ]; then
     npm exec prisma generate
 fi
 
+# Build the TypeScript application
+print_status "Building TypeScript application..."
+npm run build
+
 # Check database connection and run migrations
 print_status "Checking database connection..."
 if npm exec prisma db push --accept-data-loss; then
@@ -108,7 +112,7 @@ chown www-data:www-data "$APP_DIR/logs"
 
 # Start the backend application with PM2
 print_status "Starting backend application..."
-pm2 start "npm exec ts-node -r tsconfig-paths/register src/index.ts" \
+pm2 start "npm run start" \
     --name "visipakalpojumi-backend" \
     --cwd "$BACKEND_DIR" \
     --env production \
