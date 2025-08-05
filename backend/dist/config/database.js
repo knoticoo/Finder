@@ -15,7 +15,10 @@ const connectDatabase = async () => {
     }
     catch (error) {
         console.error('❌ Database connection failed:', error);
-        throw error;
+        console.log('⚠️  Running in development mode without database');
+        if (process.env['NODE_ENV'] === 'production') {
+            throw error;
+        }
     }
 };
 exports.connectDatabase = connectDatabase;

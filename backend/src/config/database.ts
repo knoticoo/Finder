@@ -18,7 +18,11 @@ export const connectDatabase = async (): Promise<void> => {
     console.log('✅ Database connected successfully');
   } catch (error) {
     console.error('❌ Database connection failed:', error);
-    throw error;
+    console.log('⚠️  Running in development mode without database');
+    // Don't throw error in development mode
+    if (process.env['NODE_ENV'] === 'production') {
+      throw error;
+    }
   }
 };
 
