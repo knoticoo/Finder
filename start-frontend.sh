@@ -32,7 +32,7 @@ print_error() {
 }
 
 # Application directory
-APP_DIR="/root/Finder"
+APP_DIR="/workspace"
 FRONTEND_DIR="$APP_DIR/frontend"
 
 # Check if frontend directory exists
@@ -61,11 +61,13 @@ start_frontend() {
     # Check if node_modules exists
     if [ ! -d "node_modules" ]; then
         print_status "Installing Node.js dependencies for frontend..."
+        export PATH="/home/ubuntu/.nvm/versions/node/v22.16.0/bin:$PATH"
         npm install
     fi
     
     # Start the frontend development server
     print_status "Starting Next.js development server..."
+    export PATH="/home/ubuntu/.nvm/versions/node/v22.16.0/bin:$PATH"
     nohup npm run dev > "$APP_DIR/logs/frontend.log" 2>&1 &
     FRONTEND_PID=$!
     
