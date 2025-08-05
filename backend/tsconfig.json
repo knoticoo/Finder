@@ -35,7 +35,9 @@
       "@/utils/*": ["utils/*"],
       "@/config/*": ["config/*"],
       "@/types/*": ["types/*"]
-    }
+    },
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
   "include": [
     "src/**/*"
