@@ -1,4 +1,4 @@
 
 > frontend@0.1.0 start
-> next start -H 0.0.0.0
+> next start -H 0.0.0.0 -p 3000
 

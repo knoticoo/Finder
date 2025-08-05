@@ -204,8 +204,8 @@ start_frontend() {
     
     # Start the frontend production server
     print_status "Starting Next.js production server..."
-    # Start with host binding to allow external access on port 80
-    nohup npm start -- -H 0.0.0.0 -p 80 > "$APP_DIR/logs/frontend.log" 2> "$APP_DIR/logs/frontend-error.log" &
+    # Start with host binding to allow external access on port 3000
+    nohup npm start -- -H 0.0.0.0 -p 3000 > "$APP_DIR/logs/frontend.log" 2> "$APP_DIR/logs/frontend-error.log" &
     FRONTEND_PID=$!
     
     # Wait for frontend to start
@@ -214,10 +214,10 @@ start_frontend() {
     
     # Check if frontend is running with detailed error reporting
     print_status "Checking frontend availability..."
-    if curl -s http://localhost:80 > /dev/null; then
-        print_success "Frontend application is running on port 80"
+    if curl -s http://localhost:3000 > /dev/null; then
+        print_success "Frontend application is running on port 3000"
         print_status "Testing frontend response..."
-        FRONTEND_RESPONSE=$(curl -s http://localhost:80 | head -c 200)
+        FRONTEND_RESPONSE=$(curl -s http://localhost:3000 | head -c 200)
         if echo "$FRONTEND_RESPONSE" | grep -q "VisiPakalpojumi"; then
             print_success "Frontend dashboard is loading correctly"
         else
@@ -228,7 +228,7 @@ start_frontend() {
         # Check external IP access
         EXTERNAL_IP=$(curl -s ifconfig.me 2>/dev/null || echo "unknown")
         print_status "External IP: $EXTERNAL_IP"
-        print_status "Frontend should be accessible at: http://$EXTERNAL_IP:80"
+        print_status "Frontend should be accessible at: http://$EXTERNAL_IP:3000"
     else
         print_error "Frontend application failed to start"
         print_status "Checking frontend logs..."
