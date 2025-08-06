@@ -80,6 +80,9 @@ app.get('/health', (_req, res) => {
         version: process.env['npm_package_version'] || '1.0.0'
     });
 });
+app.get('/favicon.ico', (_req, res) => {
+    res.status(204).end();
+});
 app.use('/api/auth', auth_1.default);
 app.use('/api/users', users_1.default);
 app.use('/api/services', services_1.default);
