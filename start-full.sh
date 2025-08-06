@@ -554,9 +554,9 @@ start_backend() {
     mkdir -p "$APP_DIR/logs"
     
     # Start the backend application
-    print_status "Starting backend application..."
+    print_status "Starting backend application in production mode..."
     cd "$BACKEND_DIR"
-    nohup npm start > "$APP_DIR/logs/backend.log" 2> "$APP_DIR/logs/backend-error.log" &
+    nohup env NODE_ENV=production npm start > "$APP_DIR/logs/backend.log" 2> "$APP_DIR/logs/backend-error.log" &
     BACKEND_PID=$!
     
     # Wait for backend to start
@@ -661,9 +661,9 @@ start_frontend() {
     mkdir -p "$APP_DIR/logs"
     
     # Start the frontend production server
-    print_status "Starting Next.js standalone server..."
+    print_status "Starting Next.js standalone server in production mode..."
     cd "$FRONTEND_DIR"
-    nohup env HOSTNAME=0.0.0.0 node .next/standalone/server.js > "$APP_DIR/logs/frontend.log" 2> "$APP_DIR/logs/frontend-error.log" &
+    nohup env NODE_ENV=production HOSTNAME=0.0.0.0 node .next/standalone/server.js > "$APP_DIR/logs/frontend.log" 2> "$APP_DIR/logs/frontend-error.log" &
     FRONTEND_PID=$!
     
     # Wait for frontend to start

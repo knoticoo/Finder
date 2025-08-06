@@ -2,12 +2,14 @@
 
 import { useState, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { EyeIcon, EyeSlashIcon, WrenchScrewdriverIcon, UserIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline'
 import { authAPI } from '@/lib/api'
+import LanguageSwitcher from '@/components/language/LanguageSwitcher'
+import { useLocale } from 'next-intl'
 
 const registerSchema = z.object({
   firstName: z.string().min(2, 'Vārds jābūt vismaz 2 simboli').max(50, 'Vārds nevar būt garāks par 50 simboliem'),
@@ -36,6 +38,8 @@ function RegisterForm() {
   const [success, setSuccess] = useState('')
   const router = useRouter()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const locale = useLocale()
   const defaultRole = searchParams.get('role') as 'CUSTOMER' | 'PROVIDER' || 'CUSTOMER'
 
   const {
@@ -52,6 +56,22 @@ function RegisterForm() {
   })
 
   const selectedRole = watch('role')
+  const selectedLanguage = watch('language')
+
+  // Handle language change to switch page language
+  const handleLanguageChange = (newLang: string) => {
+    const langMap: { [key: string]: string } = {
+      'LATVIAN': 'lv',
+      'RUSSIAN': 'ru', 
+      'ENGLISH': 'en'
+    }
+    const localeCode = langMap[newLang] || 'lv'
+    
+    // Remove current locale from pathname and add new one
+    const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '')
+    const newPath = `/${localeCode}${pathWithoutLocale}`
+    router.push(newPath)
+  }
 
   const onSubmit = async (data: RegisterForm) => {
     setIsLoading(true)
@@ -93,8 +113,14 @@ function RegisterForm() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="flex justify-center">
-            <WrenchScrewdriverIcon className="h-12 w-12 text-blue-600" />
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex-1"></div>
+            <div className="flex justify-center flex-1">
+              <WrenchScrewdriverIcon className="h-12 w-12 text-blue-600" />
+            </div>
+            <div className="flex-1 flex justify-end">
+              <LanguageSwitcher currentLocale={locale} />
+            </div>
           </div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
             Izveidot kontu
@@ -313,6 +339,12 @@ function RegisterForm() {
                 {...register('language')}
                 id="language"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                onChange={(e) => {
+                  // Update form value
+                  const newValue = e.target.value as 'LATVIAN' | 'RUSSIAN' | 'ENGLISH'
+                  // Trigger language change
+                  handleLanguageChange(newValue)
+                }}
               >
                 <option value="LATVIAN">Latviešu</option>
                 <option value="RUSSIAN">Русский</option>
