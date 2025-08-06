@@ -240,6 +240,42 @@ start_postgresql() {
     fi
 }
 
+# Function to handle database migration issues
+handle_migration_issues() {
+    print_status "Handling database migration issues..."
+    
+    cd "$BACKEND_DIR"
+    
+    # Check if fix-migration.sh exists and is executable
+    if [ -f "./fix-migration.sh" ] && [ -x "./fix-migration.sh" ]; then
+        print_status "Running migration fix script..."
+        if ./fix-migration.sh; then
+            print_success "Migration issues resolved by fix script"
+            return 0
+        else
+            print_error "Migration fix script failed"
+            return 1
+        fi
+    else
+        print_warning "Migration fix script not found, attempting manual resolution..."
+        
+        # Try to baseline the migration
+        if npm exec prisma migrate resolve --applied 20250804170825_init 2>/dev/null; then
+            print_success "Database baselined successfully"
+            return 0
+        fi
+        
+        # Try db push as fallback
+        if npm exec prisma db push 2>/dev/null; then
+            print_success "Database schema pushed successfully"
+            return 0
+        fi
+        
+        print_error "Could not resolve migration issues automatically"
+        return 1
+    fi
+}
+
 # Function to start backend
 start_backend() {
     print_status "Starting backend application..."
@@ -262,6 +298,11 @@ start_backend() {
         print_status "Prisma client already generated"
     fi
     
+    # Ensure migration fix script exists
+    if [ ! -f "./fix-migration.sh" ]; then
+        print_status "Migration fix script not found - this is normal for first run"
+    fi
+    
     # Build the TypeScript application
     print_status "Building TypeScript application..."
     if npm run build; then
@@ -274,12 +315,27 @@ start_backend() {
     # Start PostgreSQL database
     start_postgresql
     
-    # Run database migrations
+    # Run database migrations with P3005 error handling
     print_status "Running database migrations..."
     if npm exec prisma migrate deploy; then
         print_success "Database migrations completed successfully"
     else
-        print_warning "Database migrations failed - this might be expected if database is already up to date"
+        print_warning "Migration failed - checking for P3005 error..."
+        
+        # Check if it's a P3005 error (database schema not empty)
+        if npm exec prisma migrate deploy 2>&1 | grep -q "P3005"; then
+            print_status "Detected P3005 error - database schema is not empty"
+            if handle_migration_issues; then
+                print_success "Migration issues resolved successfully"
+            else
+                print_error "Failed to resolve migration issues"
+                print_status "Please run the migration fix script manually:"
+                print_status "  cd $BACKEND_DIR && ./fix-migration.sh"
+                exit 1
+            fi
+        else
+            print_warning "Database migrations failed - this might be expected if database is already up to date"
+        fi
     fi
     
     # Ensure logs directory exists
