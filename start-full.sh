@@ -240,24 +240,124 @@ start_postgresql() {
     fi
 }
 
+# Function to create fresh database
+create_fresh_database() {
+    print_status "Creating fresh database..."
+    
+    cd "$APP_DIR"
+    
+    # Check if create-database.sh exists and is executable
+    if [ -f "./create-database.sh" ] && [ -x "./create-database.sh" ]; then
+        print_status "Running database creation script..."
+        if ./create-database.sh; then
+            print_success "Fresh database created successfully"
+            return 0
+        else
+            print_error "Database creation script failed"
+            return 1
+        fi
+    else
+        print_warning "Database creation script not found, attempting manual creation..."
+        
+        cd "$BACKEND_DIR"
+        
+        # Try to create database manually
+        DB_NAME="visipakalpojumi"
+        if sudo -u postgres createdb "$DB_NAME" 2>/dev/null; then
+            print_success "Database created manually"
+        else
+            print_status "Database may already exist"
+        fi
+        
+        # Generate Prisma client
+        if npm exec prisma generate; then
+            print_success "Prisma client generated"
+        fi
+        
+        # Try to apply migrations
+        if npm exec prisma migrate deploy; then
+            print_success "Migrations applied successfully"
+            return 0
+        else
+            print_error "Could not apply migrations"
+            return 1
+        fi
+    fi
+}
+
 # Function to handle database migration issues
 handle_migration_issues() {
     print_status "Handling database migration issues..."
     
     cd "$BACKEND_DIR"
     
-    # Check if fix-migration.sh exists and is executable
-    if [ -f "./fix-migration.sh" ] && [ -x "./fix-migration.sh" ]; then
-        print_status "Running migration fix script..."
-        if ./fix-migration.sh; then
-            print_success "Migration issues resolved by fix script"
+    # Check for P3005 error (schema not empty) - offer to recreate database
+    print_status "Detected migration issues - checking error type..."
+    
+    # Get the migration error details
+    MIGRATION_OUTPUT=$(npm exec prisma migrate deploy 2>&1 || true)
+    
+    if echo "$MIGRATION_OUTPUT" | grep -q "P3005"; then
+        print_warning "P3005 Error: Database schema is not empty"
+        print_status "This usually means the database has existing data that conflicts with migrations"
+        print_status "Recommended solution: Create a fresh database"
+        
+        # Automatically recreate the database
+        print_status "Recreating database to resolve P3005 error..."
+        cd "$APP_DIR"
+        
+        # Delete existing database
+        if [ -f "./delete-database.sh" ] && [ -x "./delete-database.sh" ]; then
+            ./delete-database.sh
+        fi
+        
+        # Create fresh database
+        if create_fresh_database; then
+            print_success "Database recreated successfully - P3005 resolved"
             return 0
         else
-            print_error "Migration fix script failed"
+            print_error "Failed to recreate database"
+            return 1
+        fi
+        
+    elif echo "$MIGRATION_OUTPUT" | grep -q "P3014"; then
+        print_warning "P3014 Error: Shadow database creation failed"
+        print_status "This usually means insufficient database permissions"
+        
+        # Try to fix permissions and create shadow database
+        print_status "Attempting to fix shadow database permissions..."
+        
+        DB_NAME="visipakalpojumi"
+        DB_SHADOW_NAME="${DB_NAME}_shadow"
+        
+        # Grant CREATEDB permission to postgres user
+        sudo -u postgres psql -c "ALTER USER postgres CREATEDB;" 2>/dev/null || true
+        
+        # Create shadow database manually
+        sudo -u postgres createdb "$DB_SHADOW_NAME" 2>/dev/null || true
+        
+        # Try migration again
+        if npm exec prisma migrate deploy; then
+            print_success "P3014 resolved - migrations applied successfully"
+            return 0
+        else
+            print_error "Could not resolve P3014 error"
             return 1
         fi
     else
-        print_warning "Migration fix script not found, attempting manual resolution..."
+        # Handle other migration issues
+        print_warning "Unknown migration error - attempting standard fixes..."
+        
+        # Check if fix-migration.sh exists and is executable
+        if [ -f "./fix-migration.sh" ] && [ -x "./fix-migration.sh" ]; then
+            print_status "Running migration fix script..."
+            if ./fix-migration.sh; then
+                print_success "Migration issues resolved by fix script"
+                return 0
+            else
+                print_error "Migration fix script failed"
+            fi
+        fi
         
         # Try to baseline the migration
         if npm exec prisma migrate resolve --applied 20250804170825_init 2>/dev/null; then
@@ -272,6 +372,7 @@ handle_migration_issues() {
         fi
         
         print_error "Could not resolve migration issues automatically"
+        print_status "Consider running './delete-database.sh' followed by './create-database.sh'"
         return 1
     fi
 }
@@ -315,26 +416,40 @@ start_backend() {
     # Start PostgreSQL database
     start_postgresql
     
-    # Run database migrations with P3005 error handling
-    print_status "Running database migrations..."
-    if npm exec prisma migrate deploy; then
-        print_success "Database migrations completed successfully"
+    # Check if database exists, create if needed
+    print_status "Checking database status..."
+    DB_NAME="visipakalpojumi"
+    
+    # Check if database exists
+    if ! sudo -u postgres psql -lqt | cut -d \| -f 1 | grep -qw "$DB_NAME"; then
+        print_status "Database does not exist - creating fresh database..."
+        if create_fresh_database; then
+            print_success "Fresh database created and initialized"
+        else
+            print_error "Failed to create database"
+            exit 1
+        fi
     else
-        print_warning "Migration failed - checking for P3005 error..."
+        print_status "Database exists - proceeding with migrations..."
         
-        # Check if it's a P3005 error (database schema not empty)
-        if npm exec prisma migrate deploy 2>&1 | grep -q "P3005"; then
-            print_status "Detected P3005 error - database schema is not empty"
+        # Run database migrations with enhanced error handling
+        print_status "Running database migrations..."
+        if npm exec prisma migrate deploy; then
+            print_success "Database migrations completed successfully"
+        else
+            print_warning "Migration failed - analyzing error..."
+            
+            # Handle migration issues with improved error detection
             if handle_migration_issues; then
                 print_success "Migration issues resolved successfully"
             else
                 print_error "Failed to resolve migration issues"
-                print_status "Please run the migration fix script manually:"
-                print_status "  cd $BACKEND_DIR && ./fix-migration.sh"
+                print_status "Manual intervention may be required:"
+                print_status "  Option 1: Run './delete-database.sh' then restart this script"
+                print_status "  Option 2: Run './create-database.sh' to reset the database"
+                print_status "  Option 3: Check logs and fix manually: cd $BACKEND_DIR && npm exec prisma migrate deploy"
                 exit 1
             fi
-        else
-            print_warning "Database migrations failed - this might be expected if database is already up to date"
         fi
     fi
     
