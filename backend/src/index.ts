@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import session from 'express-session';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
@@ -11,6 +12,7 @@ import dotenv from 'dotenv';
 import { connectDatabase } from '@/config/database';
 import { errorHandler } from '@/middleware/errorHandler';
 import { notFound } from '@/middleware/notFound';
+import passport from '@/config/passport';
 
 // Import routes
 import authRoutes from '@/routes/auth';
@@ -42,6 +44,21 @@ app.use(cors({
   origin: process.env['NODE_ENV'] === 'production' ? '*' : (process.env['FRONTEND_URL'] || 'http://localhost:3000'),
   credentials: true
 }));
+
+// Session middleware (required for OAuth)
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key-here',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Rate limiting
 const limiter = rateLimit({
