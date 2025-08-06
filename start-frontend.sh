@@ -71,7 +71,7 @@ start_frontend() {
     npm run build
     
     print_status "Starting Next.js standalone server..."
-    nohup node .next/standalone/server.js > "$APP_DIR/logs/frontend.log" 2>&1 &
+    nohup env HOSTNAME=0.0.0.0 node .next/standalone/server.js > "$APP_DIR/logs/frontend.log" 2>&1 &
     FRONTEND_PID=$!
     
     # Wait for frontend to start
