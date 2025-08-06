@@ -13,7 +13,7 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  password  String
+  password  String?  // Make password optional for OAuth users
   firstName String
   lastName  String
   phone     String?
@@ -22,6 +22,11 @@ model User {
   language  Language @default(LATVIAN)
   isVerified Boolean @default(false)
   isActive  Boolean  @default(true)
+  
+  // OAuth provider fields
+  googleId    String?  @unique
+  facebookId  String?  @unique
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
