@@ -38,8 +38,8 @@ else
    print_status "Running as user - proceeding with startup"
 fi
 
-# Application directory - use absolute paths for better reliability
-APP_DIR="/root/workspace"
+# Application directory - use current working directory for better portability
+APP_DIR="$(pwd)"
 BACKEND_DIR="$APP_DIR/backend"
 FRONTEND_DIR="$APP_DIR/frontend"
 
@@ -240,48 +240,169 @@ start_postgresql() {
     fi
 }
 
+# Function to ensure PostgreSQL user exists with proper permissions
+setup_postgresql_user() {
+    print_status "Setting up PostgreSQL user and permissions..."
+    
+    # Set password for postgres superuser (needed for user management)
+    if sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';" 2>/dev/null; then
+        print_status "PostgreSQL superuser password configured"
+    else
+        print_warning "Could not set postgres user password"
+    fi
+    
+    # Check if visipakalpojumi_user exists
+    USER_EXISTS=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='visipakalpojumi_user';" 2>/dev/null || echo "")
+    
+    if [ -z "$USER_EXISTS" ]; then
+        print_status "Creating visipakalpojumi_user..."
+        if sudo -u postgres psql -c "CREATE USER visipakalpojumi_user WITH CREATEDB LOGIN PASSWORD 'visipakalpojumi_password';" 2>/dev/null; then
+            print_success "Database user 'visipakalpojumi_user' created"
+        else
+            print_error "Failed to create database user"
+            return 1
+        fi
+    else
+        print_status "Database user 'visipakalpojumi_user' already exists"
+        # Ensure user has correct permissions
+        sudo -u postgres psql -c "ALTER USER visipakalpojumi_user WITH CREATEDB LOGIN;" 2>/dev/null || true
+    fi
+    
+    return 0
+}
+
+# Function to test database connection with application user
+test_database_connection() {
+    print_status "Testing database connection..."
+    
+    # Test if we can connect to the database with the application user
+    if PGPASSWORD='visipakalpojumi_password' psql -h localhost -p 5432 -U visipakalpojumi_user -d visipakalpojumi -c "SELECT 1;" >/dev/null 2>&1; then
+        print_success "Database connection test successful"
+        return 0
+    else
+        print_status "Database connection test failed - database setup needed"
+        return 1
+    fi
+}
+
+# Function to create database with proper owner
+create_database_with_owner() {
+    print_status "Creating database with proper ownership..."
+    
+    # Create database owned by visipakalpojumi_user
+    if sudo -u postgres createdb -O visipakalpojumi_user visipakalpojumi 2>/dev/null; then
+        print_success "Database 'visipakalpojumi' created with proper owner"
+    else
+        print_status "Database may already exist, checking ownership..."
+        # Ensure proper ownership if database exists
+        sudo -u postgres psql -c "ALTER DATABASE visipakalpojumi OWNER TO visipakalpojumi_user;" 2>/dev/null || true
+    fi
+    
+    # Create shadow database for Prisma migrations
+    if sudo -u postgres createdb -O visipakalpojumi_user visipakalpojumi_shadow 2>/dev/null; then
+        print_success "Shadow database created"
+    else
+        print_status "Shadow database may already exist"
+    fi
+    
+    return 0
+}
+
+# Function to run database migrations
+setup_database_schema() {
+    print_status "Setting up database schema..."
+    
+    cd "$BACKEND_DIR"
+    
+    # Generate Prisma client
+    if npm exec prisma generate >/dev/null 2>&1; then
+        print_success "Prisma client generated"
+    else
+        print_warning "Prisma client generation failed"
+    fi
+    
+    # Check if migrations exist, if not create initial migration
+    if [ ! -d "prisma/migrations" ] || [ -z "$(ls -A prisma/migrations 2>/dev/null)" ]; then
+        print_status "Creating initial database migration..."
+        if npm exec prisma migrate dev --name init >/dev/null 2>&1; then
+            print_success "Initial migration created and applied"
+        else
+            print_warning "Migration creation failed, trying deploy..."
+            npm exec prisma migrate deploy >/dev/null 2>&1 || true
+        fi
+    else
+        print_status "Applying existing migrations..."
+        if npm exec prisma migrate deploy >/dev/null 2>&1; then
+            print_success "Database migrations applied"
+        else
+            print_warning "Some migrations may have failed"
+        fi
+    fi
+    
+    return 0
+}
+
+# Enhanced database setup function
+setup_database() {
+    print_status "Checking database setup..."
+    
+    # First, ensure PostgreSQL is running
+    if ! pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+        print_status "PostgreSQL not running, attempting to start..."
+        start_postgresql
+    else
+        print_success "PostgreSQL is already running"
+    fi
+    
+    # Test if database is already properly set up and working
+    if test_database_connection; then
+        print_success "Database is already properly configured - skipping setup"
+        return 0
+    fi
+    
+    print_status "Database setup required..."
+    
+    # Setup PostgreSQL user
+    if ! setup_postgresql_user; then
+        print_error "Failed to setup PostgreSQL user"
+        return 1
+    fi
+    
+    # Create database with proper owner
+    if ! create_database_with_owner; then
+        print_error "Failed to create database"
+        return 1
+    fi
+    
+    # Setup database schema
+    if ! setup_database_schema; then
+        print_error "Failed to setup database schema"
+        return 1
+    fi
+    
+    # Final connection test
+    if test_database_connection; then
+        print_success "Database setup completed successfully"
+        return 0
+    else
+        print_error "Database setup failed - connection test unsuccessful"
+        return 1
+    fi
+}
+
 # Function to create fresh database
 create_fresh_database() {
     print_status "Creating fresh database..."
     
     cd "$APP_DIR"
     
-    # Check if create-database.sh exists and is executable
-    if [ -f "./create-database.sh" ] && [ -x "./create-database.sh" ]; then
-        print_status "Running database creation script..."
-        if ./create-database.sh; then
-            print_success "Fresh database created successfully"
-            return 0
-        else
-            print_error "Database creation script failed"
-            return 1
-        fi
+    # Use our enhanced database setup
+    if setup_database; then
+        print_success "Fresh database created successfully"
+        return 0
     else
-        print_warning "Database creation script not found, attempting manual creation..."
-        
-        cd "$BACKEND_DIR"
-        
-        # Try to create database manually
-        DB_NAME="visipakalpojumi"
-        if sudo -u postgres createdb "$DB_NAME" 2>/dev/null; then
-            print_success "Database created manually"
-        else
-            print_status "Database may already exist"
-        fi
-        
-        # Generate Prisma client
-        if npm exec prisma generate; then
-            print_success "Prisma client generated"
-        fi
-        
-        # Try to apply migrations
-        if npm exec prisma migrate deploy; then
-            print_success "Migrations applied successfully"
-            return 0
-        else
-            print_error "Could not apply migrations"
-            return 1
-        fi
+        print_error "Database setup failed"
+        return 1
     fi
 }
 
@@ -416,41 +537,17 @@ start_backend() {
     # Start PostgreSQL database
     start_postgresql
     
-    # Check if database exists, create if needed
-    print_status "Checking database status..."
-    DB_NAME="visipakalpojumi"
-    
-    # Check if database exists
-    if ! sudo -u postgres psql -lqt | cut -d \| -f 1 | grep -qw "$DB_NAME"; then
-        print_status "Database does not exist - creating fresh database..."
-        if create_fresh_database; then
-            print_success "Fresh database created and initialized"
-        else
-            print_error "Failed to create database"
-            exit 1
-        fi
+    # Enhanced database setup with automatic user creation and testing
+    print_status "Setting up database..."
+    if setup_database; then
+        print_success "Database setup completed successfully"
     else
-        print_status "Database exists - proceeding with migrations..."
-        
-        # Run database migrations with enhanced error handling
-        print_status "Running database migrations..."
-        if npm exec prisma migrate deploy; then
-            print_success "Database migrations completed successfully"
-        else
-            print_warning "Migration failed - analyzing error..."
-            
-            # Handle migration issues with improved error detection
-            if handle_migration_issues; then
-                print_success "Migration issues resolved successfully"
-            else
-                print_error "Failed to resolve migration issues"
-                print_status "Manual intervention may be required:"
-                print_status "  Option 1: Run './delete-database.sh' then restart this script"
-                print_status "  Option 2: Run './create-database.sh' to reset the database"
-                print_status "  Option 3: Check logs and fix manually: cd $BACKEND_DIR && npm exec prisma migrate deploy"
-                exit 1
-            fi
-        fi
+        print_error "Database setup failed"
+        print_status "Manual intervention may be required:"
+        print_status "  Option 1: Run './delete-database.sh' then restart this script"
+        print_status "  Option 2: Check PostgreSQL service: sudo service postgresql status"
+        print_status "  Option 3: Check logs and fix manually: cd $BACKEND_DIR && npm exec prisma migrate deploy"
+        exit 1
     fi
     
     # Ensure logs directory exists

@@ -38,8 +38,8 @@ DB_USER="postgres"
 DB_HOST="localhost"
 DB_PORT="5432"
 
-# Application directories
-APP_DIR="/workspace"
+# Application directories - use current working directory
+APP_DIR="$(pwd)"
 BACKEND_DIR="$APP_DIR/backend"
 
 print_status "Starting database creation process..."
