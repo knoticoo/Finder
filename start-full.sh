@@ -154,6 +154,92 @@ check_ports() {
     return 0
 }
 
+# Function to start PostgreSQL
+start_postgresql() {
+    print_status "Starting PostgreSQL database..."
+    
+    # Check if PostgreSQL is already running
+    if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+        print_success "PostgreSQL is already running"
+        return 0
+    fi
+    
+    # Try to start PostgreSQL using different methods
+    print_status "PostgreSQL not running, attempting to start..."
+    
+    # Method 1: Try systemctl (systemd)
+    if command -v systemctl >/dev/null 2>&1; then
+        print_status "Trying to start PostgreSQL with systemctl..."
+        if sudo systemctl start postgresql 2>/dev/null; then
+            print_success "PostgreSQL started with systemctl"
+            sleep 3
+            if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+                return 0
+            fi
+        fi
+    fi
+    
+    # Method 2: Try service command
+    if command -v service >/dev/null 2>&1; then
+        print_status "Trying to start PostgreSQL with service command..."
+        if sudo service postgresql start 2>/dev/null; then
+            print_success "PostgreSQL started with service command"
+            sleep 3
+            if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+                return 0
+            fi
+        fi
+    fi
+    
+    # Method 3: Try pg_ctlcluster (Debian/Ubuntu specific)
+    if command -v pg_ctlcluster >/dev/null 2>&1; then
+        print_status "Trying to start PostgreSQL with pg_ctlcluster..."
+        # Get the PostgreSQL version
+        PG_VERSION=$(ls /etc/postgresql/ 2>/dev/null | head -n1)
+        if [ ! -z "$PG_VERSION" ]; then
+            if sudo pg_ctlcluster "$PG_VERSION" main start 2>/dev/null; then
+                print_success "PostgreSQL started with pg_ctlcluster"
+                sleep 3
+                if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+                    return 0
+                fi
+            fi
+        fi
+    fi
+    
+    # Method 4: Try direct pg_ctl command
+    if command -v pg_ctl >/dev/null 2>&1; then
+        print_status "Trying to start PostgreSQL with pg_ctl..."
+        # Try to find PostgreSQL data directory
+        for data_dir in /var/lib/postgresql/*/main /usr/local/var/postgres /var/lib/pgsql/data; do
+            if [ -d "$data_dir" ]; then
+                print_status "Found PostgreSQL data directory: $data_dir"
+                if sudo -u postgres pg_ctl start -D "$data_dir" 2>/dev/null; then
+                    print_success "PostgreSQL started with pg_ctl"
+                    sleep 3
+                    if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+                        return 0
+                    fi
+                fi
+                break
+            fi
+        done
+    fi
+    
+    # Final check
+    if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+        print_success "PostgreSQL is now running"
+        return 0
+    else
+        print_error "Failed to start PostgreSQL with all methods"
+        print_status "Please start PostgreSQL manually:"
+        print_status "  sudo service postgresql start"
+        print_status "  # or #"
+        print_status "  sudo systemctl start postgresql"
+        exit 1
+    fi
+}
+
 # Function to start backend
 start_backend() {
     print_status "Starting backend application..."
@@ -185,8 +271,16 @@ start_backend() {
         exit 1
     fi
     
-    # Skip database operations in development mode
-    print_status "Skipping database operations in development mode..."
+    # Start PostgreSQL database
+    start_postgresql
+    
+    # Run database migrations
+    print_status "Running database migrations..."
+    if npm exec prisma migrate deploy; then
+        print_success "Database migrations completed successfully"
+    else
+        print_warning "Database migrations failed - this might be expected if database is already up to date"
+    fi
     
     # Ensure logs directory exists
     mkdir -p "$APP_DIR/logs"
@@ -258,6 +352,16 @@ start_frontend() {
     print_status "Building Next.js application for production..."
     if npm run build; then
         print_success "Frontend build completed successfully"
+        
+        # Verify CSS files are generated
+        print_status "Verifying CSS build..."
+        if find .next/static/css -name "*.css" 2>/dev/null | grep -q css; then
+            print_success "CSS files generated successfully"
+            CSS_COUNT=$(find .next/static/css -name "*.css" 2>/dev/null | wc -l)
+            print_status "Found $CSS_COUNT CSS files"
+        else
+            print_warning "No CSS files found - this might cause styling issues"
+        fi
     else
         print_error "Frontend build failed"
         print_status "Check build errors above"
@@ -269,6 +373,20 @@ start_frontend() {
         print_error "Standalone server not found at .next/standalone/server.js"
         print_status "Build may have failed or standalone output not configured"
         exit 1
+    fi
+    
+    # Copy static assets to standalone directory (required for CSS/JS to work)
+    print_status "Copying static assets for standalone server..."
+    if [ -d ".next/static" ]; then
+        mkdir -p ".next/standalone/.next"
+        cp -r ".next/static" ".next/standalone/.next/" 2>/dev/null || true
+        print_success "Static assets copied"
+    fi
+    
+    # Copy public assets if they exist
+    if [ -d "public" ]; then
+        cp -r "public" ".next/standalone/" 2>/dev/null || true
+        print_status "Public assets copied"
     fi
     
     # Ensure logs directory exists
@@ -372,6 +490,7 @@ echo "- Backend PID: $BACKEND_PID"
 echo "- Frontend PID: $FRONTEND_PID"
 echo ""
 echo "🌐 Services:"
+echo "- PostgreSQL Database: Running on port 5432"
 echo "- Backend API: http://localhost:3001"
 echo "- Frontend Dashboard: http://localhost:3000"
 echo "- Health Check: http://localhost:3001/health"
