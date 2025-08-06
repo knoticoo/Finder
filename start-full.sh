@@ -277,7 +277,7 @@ start_frontend() {
     # Start the frontend production server
     print_status "Starting Next.js standalone server..."
     cd "$FRONTEND_DIR"
-    nohup node .next/standalone/server.js > "$APP_DIR/logs/frontend.log" 2> "$APP_DIR/logs/frontend-error.log" &
+    nohup env HOSTNAME=0.0.0.0 node .next/standalone/server.js > "$APP_DIR/logs/frontend.log" 2> "$APP_DIR/logs/frontend-error.log" &
     FRONTEND_PID=$!
     
     # Wait for frontend to start
