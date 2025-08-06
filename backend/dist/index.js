@@ -9,12 +9,14 @@ const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const compression_1 = __importDefault(require("compression"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+const express_session_1 = __importDefault(require("express-session"));
 const http_1 = require("http");
 const socket_io_1 = require("socket.io");
 const dotenv_1 = __importDefault(require("dotenv"));
 const database_1 = require("./config/database");
 const errorHandler_1 = require("./middleware/errorHandler");
 const notFound_1 = require("./middleware/notFound");
+const passport_1 = __importDefault(require("./config/passport"));
 const auth_1 = __importDefault(require("./routes/auth"));
 const users_1 = __importDefault(require("./routes/users"));
 const services_1 = __importDefault(require("./routes/services"));
@@ -38,6 +40,17 @@ app.use((0, cors_1.default)({
     origin: process.env['NODE_ENV'] === 'production' ? '*' : (process.env['FRONTEND_URL'] || 'http://localhost:3000'),
     credentials: true
 }));
+app.use((0, express_session_1.default)({
+    secret: process.env.SESSION_SECRET || 'your-secret-key-here',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000
+    }
+}));
+app.use(passport_1.default.initialize());
+app.use(passport_1.default.session());
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
     max: 100,

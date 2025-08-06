@@ -5,11 +5,7 @@ import {
   requestPasswordReset,
   confirmPasswordReset,
   verifyEmail,
-  refreshToken,
-  googleAuth,
-  googleCallback,
-  facebookAuth,
-  facebookCallback
+  refreshToken
 } from '@/controllers/authController';
 import {
   validateRegister,
@@ -28,13 +24,6 @@ router.post('/login', validateLogin, login);
 router.post('/forgot-password', validatePasswordReset, requestPasswordReset);
 router.post('/reset-password', validatePasswordResetConfirm, confirmPasswordReset);
 router.post('/verify-email', verifyEmail);
-
-// OAuth routes
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/auth/login' }), googleCallback);
-
-router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
-router.get('/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/auth/login' }), facebookCallback);
 
 // Protected routes
 router.post('/refresh-token', authenticate, refreshToken);
