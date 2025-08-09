@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { 
   WrenchScrewdriverIcon, 
@@ -21,7 +20,6 @@ import NotificationBell from '@/components/notifications/NotificationBell'
 import AnalyticsDashboard from '@/components/analytics/AnalyticsDashboard'
 
 export default function ProviderDashboard() {
-  const t = useTranslations('dashboard.provider')
   const [stats, setStats] = useState({
     totalServices: 0,
     activeBookings: 0,

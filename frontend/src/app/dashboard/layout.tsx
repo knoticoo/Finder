@@ -18,6 +18,7 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline'
 import MobileNavigation from '@/components/navigation/MobileNavigation'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -214,7 +215,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <main className="flex-1">
           <div className="py-6">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-              {children}
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
             </div>
           </div>
         </main>
