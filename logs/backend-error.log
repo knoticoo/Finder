@@ -1,29 +1,18 @@
-❌ Database connection failed: PrismaClientInitializationError: Can't reach database server at `localhost:5432`
-
-Please make sure your database server is running at `localhost:5432`.
-    at t (/workspace/backend/node_modules/@prisma/client/runtime/library.js:112:2488)
-    at async connectDatabase (/workspace/backend/dist/config/database.js:13:9)
-    at async startServer (/workspace/backend/dist/index.js:112:9) {
-  clientVersion: '5.22.0',
-  errorCode: 'P1001'
+Error: {
+  message: 'Not Found - /api/health',
+  stack: 'Error: Not Found - /api/health\n' +
+    '    at notFound (/workspace/backend/dist/middleware/notFound.js:5:19)\n' +
+    '    at Layer.handle [as handle_request] (/workspace/backend/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at trim_prefix (/workspace/backend/node_modules/express/lib/router/index.js:328:13)\n' +
+    '    at /workspace/backend/node_modules/express/lib/router/index.js:286:9\n' +
+    '    at Function.process_params (/workspace/backend/node_modules/express/lib/router/index.js:346:12)\n' +
+    '    at next (/workspace/backend/node_modules/express/lib/router/index.js:280:10)\n' +
+    '    at logger (/workspace/backend/node_modules/morgan/index.js:144:5)\n' +
+    '    at Layer.handle [as handle_request] (/workspace/backend/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at trim_prefix (/workspace/backend/node_modules/express/lib/router/index.js:328:13)\n' +
+    '    at /workspace/backend/node_modules/express/lib/router/index.js:286:9',
+  url: '/api/health',
+  method: 'GET',
+  ip: '::1',
+  userAgent: 'curl/8.12.1'
 }
-node:events:496
-      throw er; // Unhandled 'error' event
-      ^
-
-Error: listen EADDRINUSE: address already in use :::3001
-    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
-    at listenInCluster (node:net:1996:12)
-    at Server.listen (node:net:2101:7)
-    at startServer (/workspace/backend/dist/index.js:113:16)
-Emitted 'error' event on Server instance at:
-    at emitErrorNT (node:net:1975:8)
-    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
-  code: 'EADDRINUSE',
-  errno: -98,
-  syscall: 'listen',
-  address: '::',
-  port: 3001
-}
-
-Node.js v22.16.0
