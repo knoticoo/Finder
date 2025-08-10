@@ -1,11 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Temporarily disable ESLint during build to fix production deployment
+  // Disable ESLint and TypeScript checking during builds for production deployment
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Temporarily disable TypeScript checking during build
   typescript: {
     ignoreBuildErrors: true,
   },
