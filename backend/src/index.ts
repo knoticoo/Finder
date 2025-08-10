@@ -23,6 +23,8 @@ import reviewRoutes from '@/routes/reviews';
 import messageRoutes from '@/routes/messages';
 import subscriptionRoutes from '@/routes/subscriptions';
 import referralRoutes from '@/routes/referrals';
+import notificationRoutes from '@/routes/notifications';
+import { setSocketIO } from '@/controllers/notifications';
 
 // Load environment variables
 dotenv.config();
@@ -127,6 +129,10 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/referrals', referralRoutes);
+app.use('/api/notifications', notificationRoutes);
+
+// Set up socket.io for notifications
+setSocketIO(io);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
@@ -144,6 +150,12 @@ io.on('connection', (socket) => {
 
   socket.on('send-message', (data) => {
     socket.to(data.roomId).emit('receive-message', data);
+  });
+
+  // Handle user joining for notifications
+  socket.on('join-user', (userId) => {
+    socket.join(`user:${userId}`);
+    console.log(`User ${userId} joined for notifications`);
   });
 
   socket.on('disconnect', () => {
