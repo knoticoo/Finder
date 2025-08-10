@@ -1,13 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Temporarily disable ESLint during build to fix production deployment
+  // Enable ESLint and TypeScript checking for better code quality
+  // Only disable in production if absolutely necessary
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: process.env.NODE_ENV === 'production',
   },
-  // Temporarily disable TypeScript checking during build
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: process.env.NODE_ENV === 'production',
   },
   // Use standalone output for production
   output: 'standalone',
