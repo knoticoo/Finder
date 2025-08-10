@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { MagnifyingGlassIcon, MapPinIcon, StarIcon } from '@heroicons/react/24/outline'
+import { useRouter } from 'next/navigation'
+import { MagnifyingGlassIcon, MapPinIcon, StarIcon, UserIcon } from '@heroicons/react/24/outline'
+import { useAuth } from '@/hooks/useAuth'
+import { servicesAPI } from '@/lib/api'
 
 interface Service {
   id: string
@@ -25,8 +28,9 @@ export default function ServicesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [categories, setCategories] = useState<string[]>([])
-
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+  
+  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth()
+  const router = useRouter()
 
   useEffect(() => {
     fetchServices()
@@ -35,15 +39,13 @@ export default function ServicesPage() {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/services`)
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success) {
-          setServices(data.data)
-        }
+      const response = await servicesAPI.getAll()
+      if (response.data.success) {
+        setServices(response.data.data)
       }
     } catch (error) {
       console.error('Error fetching services:', error)
+      // Don't redirect on error - services page should work for everyone
     } finally {
       setLoading(false)
     }
@@ -51,15 +53,25 @@ export default function ServicesPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/services/categories`)
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success) {
-          setCategories(data.data)
-        }
+      const response = await servicesAPI.getCategories()
+      if (response.data.success) {
+        setCategories(response.data.data)
       }
     } catch (error) {
       console.error('Error fetching categories:', error)
+    }
+  }
+
+  const handleLogout = () => {
+    logout()
+    router.push('/')
+  }
+
+  const handleBookService = (serviceId: string) => {
+    if (!isAuthenticated) {
+      router.push('/auth/login')
+    } else {
+      router.push(`/dashboard/customer/bookings?service=${serviceId}`)
     }
   }
 
@@ -70,7 +82,7 @@ export default function ServicesPage() {
     return matchesSearch && matchesCategory
   })
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -88,20 +100,59 @@ export default function ServicesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
             <div className="flex items-center justify-between">
-              <h1 className="text-3xl font-bold text-gray-900">Pakalpojumi</h1>
-              <div className="flex space-x-4">
-                <Link
-                  href="/auth/login"
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  Ieiet
+              <div className="flex items-center space-x-4">
+                <Link href="/" className="text-blue-600 hover:text-blue-800 font-semibold">
+                  ← Sākums
                 </Link>
-                <Link
-                  href="/auth/register"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                >
-                  Reģistrēties
-                </Link>
+                <h1 className="text-3xl font-bold text-gray-900">Pakalpojumi</h1>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                {isAuthenticated && user ? (
+                  <>
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <UserIcon className="h-5 w-5" />
+                      <span>{user.firstName} {user.lastName}</span>
+                      {user.role === 'ADMIN' && (
+                        <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
+                          Admin
+                        </span>
+                      )}
+                      {user.role === 'PROVIDER' && (
+                        <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                          Provider
+                        </span>
+                      )}
+                    </div>
+                    <Link
+                      href="/dashboard"
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="text-gray-600 hover:text-gray-900"
+                    >
+                      Iziet
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/login"
+                      className="text-gray-600 hover:text-gray-900"
+                    >
+                      Ieiet
+                    </Link>
+                    <Link
+                      href="/auth/register"
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                    >
+                      Reģistrēties
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
 
@@ -166,7 +217,7 @@ export default function ServicesPage() {
                     {service.location}
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
                       <div className="flex items-center">
                         {[1, 2, 3, 4, 5].map((star) => (
@@ -190,12 +241,21 @@ export default function ServicesPage() {
                   </div>
 
                   <div className="mt-4">
-                    <Link
-                      href="/auth/register"
-                      className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors inline-block"
-                    >
-                      Reģistrēties, lai rezervētu
-                    </Link>
+                    {isAuthenticated ? (
+                      <button
+                        onClick={() => handleBookService(service.id)}
+                        className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        Rezervēt pakalpojumu
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => router.push('/auth/register')}
+                        className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        Reģistrēties, lai rezervētu
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

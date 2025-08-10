@@ -9,6 +9,22 @@ export const api = axios.create({
   },
 })
 
+// Track auth state
+let isRefreshing = false
+let failedQueue: Array<{ resolve: (value: any) => void; reject: (reason?: any) => void }> = []
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error)
+    } else {
+      resolve(token)
+    }
+  })
+  
+  failedQueue = []
+}
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
@@ -23,22 +39,78 @@ api.interceptors.request.use(
   }
 )
 
-// Response interceptor to handle auth errors
+// Response interceptor to handle auth errors and token refresh
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Only logout if we're not already on auth pages
+  async (error) => {
+    const originalRequest = error.config
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
       const currentPath = window.location.pathname
-      if (!currentPath.includes('/auth/')) {
+      
+      // Don't redirect if we're already on auth pages
+      if (currentPath.includes('/auth/')) {
+        return Promise.reject(error)
+      }
+
+      if (isRefreshing) {
+        // If a refresh is already in progress, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject })
+        }).then(() => {
+          const token = localStorage.getItem('token')
+          if (token) {
+            originalRequest.headers.Authorization = `Bearer ${token}`
+          }
+          return api(originalRequest)
+        }).catch(err => {
+          return Promise.reject(err)
+        })
+      }
+
+      originalRequest._retry = true
+      isRefreshing = true
+
+      try {
+        // Try to refresh the token
+        const refreshResponse = await api.post('/api/auth/refresh-token')
+        
+        if (refreshResponse.data.success) {
+          const { token, user } = refreshResponse.data
+          
+          // Update stored auth data
+          localStorage.setItem('token', token)
+          localStorage.setItem('user', JSON.stringify(user))
+          
+          // Update the authorization header
+          api.defaults.headers.Authorization = `Bearer ${token}`
+          originalRequest.headers.Authorization = `Bearer ${token}`
+          
+          processQueue(null, token)
+          
+          // Retry the original request
+          return api(originalRequest)
+        } else {
+          throw new Error('Token refresh failed')
+        }
+      } catch (refreshError) {
+        processQueue(refreshError, null)
+        
+        // Clear auth data and redirect to login
         localStorage.removeItem('token')
         localStorage.removeItem('user')
-        console.warn('Authentication failed, redirecting to login')
+        console.warn('Token refresh failed, redirecting to login')
         window.location.href = '/auth/login'
+        
+        return Promise.reject(refreshError)
+      } finally {
+        isRefreshing = false
       }
     } else if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
       console.error('Backend server is not accessible:', error.message)
+      // Don't redirect on network errors - just show the error
     }
+    
     return Promise.reject(error)
   }
 )
@@ -49,6 +121,7 @@ export const authAPI = {
   login: (data: any) => api.post('/api/auth/login', data),
   forgotPassword: (data: any) => api.post('/api/auth/forgot-password', data),
   resetPassword: (data: any) => api.post('/api/auth/reset-password', data),
+  refreshToken: () => api.post('/api/auth/refresh-token'),
 }
 
 export const userAPI = {

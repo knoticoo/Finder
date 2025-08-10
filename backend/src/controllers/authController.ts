@@ -249,18 +249,89 @@ export const verifyEmail = async (_req: Request, res: Response): Promise<void> =
   }
 };
 
-export const refreshToken = async (_req: Request, res: Response): Promise<void> => {
+export const refreshToken = async (req: Request, res: Response): Promise<void> => {
   try {
-    // TODO: Implement token refresh logic
-    res.status(200).json({
-      success: true,
-      message: 'Token refreshed successfully'
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({
+        success: false,
+        message: 'Access token required'
+      });
+      return;
+    }
+
+    const token = authHeader.substring(7);
+    
+    // Try to decode the token even if it's expired
+    const { verifyToken, decodeToken, generateToken } = require('@/utils/jwt');
+    
+    let decoded: any;
+    try {
+      decoded = verifyToken(token);
+    } catch (error) {
+      // If verification fails, try to decode without verification
+      decoded = decodeToken(token);
+      if (!decoded) {
+        res.status(401).json({
+          success: false,
+          message: 'Invalid token'
+        });
+        return;
+      }
+    }
+
+    // Check if user still exists and is active
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        language: true,
+        isVerified: true,
+        isActive: true
+      }
     });
+
+    if (!user || !user.isActive) {
+      res.status(401).json({
+        success: false,
+        message: 'User not found or inactive'
+      });
+      return;
+    }
+
+    // Generate new token
+    const newToken = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role
+    });
+
+    const response: AuthResponse = {
+      success: true,
+      message: 'Token refreshed successfully',
+      token: newToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        language: user.language,
+        isVerified: user.isVerified
+      }
+    };
+
+    res.status(200).json(response);
   } catch (error) {
     console.error('Token refresh error:', error);
-    res.status(500).json({
+    res.status(401).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Token refresh failed'
     });
   }
 };
