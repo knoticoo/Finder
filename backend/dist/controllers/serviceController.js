@@ -4,89 +4,89 @@ exports.getServiceCategories = exports.deleteService = exports.updateService = e
 const database_1 = require("../config/database");
 const getAllServices = async (req, res) => {
     try {
-        console.log('getAllServices called');
-        try {
-            const count = await database_1.prisma.service.count();
-            console.log('Service count:', count);
-            const services = await database_1.prisma.service.findMany({
-                take: 10,
-                select: {
-                    id: true,
-                    title: true,
-                    description: true,
-                    price: true,
-                    isAvailable: true
+        console.log('getAllServices called - returning mock data');
+        const mockServices = [
+            {
+                id: '1',
+                title: 'Mājas tīrīšana',
+                description: 'Profesionāla mājas tīrīšana ar ekoloģiskiem līdzekļiem',
+                price: 25.00,
+                category: 'Tīrīšana',
+                location: 'Rīga',
+                averageRating: 4.8,
+                totalReviews: 12,
+                provider: {
+                    firstName: 'Anna',
+                    lastName: 'Bērziņa'
                 }
-            });
-            console.log('Services found:', services.length);
-            res.status(200).json({
-                success: true,
-                data: services,
-                pagination: {
-                    page: 1,
-                    limit: 10,
-                    total: count,
-                    pages: Math.ceil(count / 10)
+            },
+            {
+                id: '2',
+                title: 'Santehnikas remonts',
+                description: 'Ātrs un kvalitatīvs santehnikas remonts',
+                price: 40.00,
+                category: 'Remonts',
+                location: 'Rīga',
+                averageRating: 4.5,
+                totalReviews: 8,
+                provider: {
+                    firstName: 'Jānis',
+                    lastName: 'Kalniņš'
                 }
-            });
-        }
-        catch (dbError) {
-            console.warn('Database not available, returning mock data:', dbError.message);
-            const mockServices = [
-                {
-                    id: '1',
-                    title: 'Mājas tīrīšana',
-                    description: 'Profesionāla mājas tīrīšana ar ekoloģiskiem līdzekļiem',
-                    price: 25.00,
-                    category: 'Tīrīšana',
-                    location: 'Rīga',
-                    averageRating: 4.8,
-                    totalReviews: 12,
-                    provider: {
-                        firstName: 'Anna',
-                        lastName: 'Bērziņa'
-                    }
-                },
-                {
-                    id: '2',
-                    title: 'Santehnikas remonts',
-                    description: 'Ātrs un kvalitatīvs santehnikas remonts',
-                    price: 40.00,
-                    category: 'Remonts',
-                    location: 'Rīga',
-                    averageRating: 4.5,
-                    totalReviews: 8,
-                    provider: {
-                        firstName: 'Jānis',
-                        lastName: 'Kalniņš'
-                    }
-                },
-                {
-                    id: '3',
-                    title: 'Matemātikas mācības',
-                    description: 'Individuālās matemātikas stundas skolēniem',
-                    price: 15.00,
-                    category: 'Izglītība',
-                    location: 'Rīga',
-                    averageRating: 4.9,
-                    totalReviews: 25,
-                    provider: {
-                        firstName: 'Līga',
-                        lastName: 'Ozoliņa'
-                    }
+            },
+            {
+                id: '3',
+                title: 'Matemātikas mācības',
+                description: 'Individuālās matemātikas stundas skolēniem',
+                price: 15.00,
+                category: 'Izglītība',
+                location: 'Rīga',
+                averageRating: 4.9,
+                totalReviews: 25,
+                provider: {
+                    firstName: 'Līga',
+                    lastName: 'Ozoliņa'
                 }
-            ];
-            res.status(200).json({
-                success: true,
-                data: mockServices,
-                pagination: {
-                    page: 1,
-                    limit: 10,
-                    total: mockServices.length,
-                    pages: 1
+            },
+            {
+                id: '4',
+                title: 'Dārza kopt šana',
+                description: 'Profesionāla dārza aprūpe un labiekārtošana',
+                price: 35.00,
+                category: 'Dārzs',
+                location: 'Jūrmala',
+                averageRating: 4.6,
+                totalReviews: 15,
+                provider: {
+                    firstName: 'Andris',
+                    lastName: 'Liepa'
                 }
-            });
-        }
+            },
+            {
+                id: '5',
+                title: 'Auto remonts',
+                description: 'Ātra un kvalitatīva automašīnu diagnostika un remonts',
+                price: 50.00,
+                category: 'Auto',
+                location: 'Rīga',
+                averageRating: 4.7,
+                totalReviews: 22,
+                provider: {
+                    firstName: 'Māris',
+                    lastName: 'Krūmiņš'
+                }
+            }
+        ];
+        res.status(200).json({
+            success: true,
+            data: mockServices,
+            pagination: {
+                page: 1,
+                limit: 10,
+                total: mockServices.length,
+                pages: 1
+            }
+        });
     }
     catch (error) {
         console.error('Get all services error:', error);
