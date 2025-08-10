@@ -47,6 +47,27 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       }
     });
 
+    // If the user is a provider, create a provider profile
+    if (user.role === 'PROVIDER') {
+      await prisma.providerProfile.create({
+        data: {
+          userId: user.id,
+          // Initialize with default empty values
+          businessName: null,
+          description: null,
+          address: null,
+          city: null,
+          postalCode: null,
+          website: null,
+          socialMedia: null,
+          hasInsurance: false,
+          insuranceDetails: null,
+          certifications: [],
+          businessHours: null
+        }
+      });
+    }
+
     // Generate JWT token
     const token = generateToken({
       userId: user.id,
