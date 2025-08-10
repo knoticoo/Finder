@@ -1,11 +1,15 @@
 #!/bin/bash
 
-# VisiPakalpojumi - Full Application Startup Script
-# This script starts both the backend API and frontend dashboard
+# Enhanced startup script for VisiPakalpojumi application
+# This script ensures all dependencies are available and launches the full application stack
 
 set -e  # Exit on any error
 
-echo "🚀 Starting VisiPakalpojumi full application (Backend + Frontend)..."
+# Configuration
+APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKEND_DIR="$APP_DIR/backend"
+FRONTEND_DIR="$APP_DIR/frontend"
+LOGS_DIR="$APP_DIR/logs"
 
 # Colors for output
 RED='\033[0;31m'
@@ -14,7 +18,11 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Function to print colored output
+# Global variables for process IDs
+BACKEND_PID=""
+FRONTEND_PID=""
+
+# Function to print colored status messages
 print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -31,142 +39,148 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if running as root
-if [[ $EUID -eq 0 ]]; then
-   print_status "Running as root - proceeding with startup"
-else
-   print_status "Running as user - proceeding with startup"
-fi
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
 
-# Application directory - use current working directory for better portability
-APP_DIR="$(pwd)"
-BACKEND_DIR="$APP_DIR/backend"
-FRONTEND_DIR="$APP_DIR/frontend"
-
-print_status "Using directories:"
-print_status "  App: $APP_DIR"
-print_status "  Backend: $BACKEND_DIR"
-print_status "  Frontend: $FRONTEND_DIR"
-
-# Check if application directory exists
-if [ ! -d "$APP_DIR" ]; then
-    print_error "Application directory not found: $APP_DIR"
-    exit 1
-fi
-
-# Check if backend directory exists
-if [ ! -d "$BACKEND_DIR" ]; then
-    print_error "Backend directory not found: $BACKEND_DIR"
-    exit 1
-fi
-
-# Check if frontend directory exists
-if [ ! -d "$FRONTEND_DIR" ]; then
-    print_error "Frontend directory not found: $FRONTEND_DIR"
-    exit 1
-fi
-
-# Function to kill existing processes
-kill_existing_processes() {
-    print_status "Stopping existing processes..."
+# Function to check system dependencies
+check_dependencies() {
+    print_status "Checking system dependencies..."
     
-    # Kill all Node.js processes that might be using our ports
-    print_status "Killing Node.js processes..."
-    pkill -f "node.*3001" 2>/dev/null || true
-    pkill -f "node.*3000" 2>/dev/null || true
-    pkill -f "next.*3000" 2>/dev/null || true
-    pkill -f "next.*start" 2>/dev/null || true
-    pkill -f "next.*dev" 2>/dev/null || true
-    pkill -f "server.js" 2>/dev/null || true
-    pkill -f "standalone/server.js" 2>/dev/null || true
+    local missing_deps=()
     
-    # Kill any processes using our ports (try multiple methods)
-    print_status "Freeing up ports 3000 and 3001..."
-    
-    # Method 1: Using fuser (if available)
-    if command -v fuser >/dev/null 2>&1; then
-        fuser -k 3000/tcp 2>/dev/null || true
-        fuser -k 3001/tcp 2>/dev/null || true
+    # Check for essential commands
+    if ! command_exists curl; then
+        missing_deps+=("curl")
     fi
     
-    # Method 2: Using lsof (if available)
-    if command -v lsof >/dev/null 2>&1; then
-        lsof -ti:3000 2>/dev/null | xargs -r kill -9 2>/dev/null || true
-        lsof -ti:3001 2>/dev/null | xargs -r kill -9 2>/dev/null || true
+    if ! command_exists node; then
+        missing_deps+=("node")
     fi
     
-    # Method 3: Using netstat and kill (fallback)
-    if command -v netstat >/dev/null 2>&1; then
-        netstat -tlnp 2>/dev/null | grep ":3000 " | awk '{print $7}' | cut -d'/' -f1 | xargs -r kill -9 2>/dev/null || true
-        netstat -tlnp 2>/dev/null | grep ":3001 " | awk '{print $7}' | cut -d'/' -f1 | xargs -r kill -9 2>/dev/null || true
+    if ! command_exists npm; then
+        missing_deps+=("npm")
     fi
     
-    # Method 4: Using ss (if available and netstat is not)
-    if command -v ss >/dev/null 2>&1 && ! command -v netstat >/dev/null 2>&1; then
-        ss -tlnp 2>/dev/null | grep ":3000 " | awk '{print $6}' | cut -d',' -f2 | cut -d'=' -f2 | xargs -r kill -9 2>/dev/null || true
-        ss -tlnp 2>/dev/null | grep ":3001 " | awk '{print $6}' | cut -d',' -f2 | cut -d'=' -f2 | xargs -r kill -9 2>/dev/null || true
+    if ! command_exists psql; then
+        missing_deps+=("postgresql-client")
     fi
     
-    # Kill PM2 processes if PM2 is available
-    if command -v pm2 >/dev/null 2>&1; then
-        print_status "Stopping PM2 processes..."
-        pm2 stop all 2>/dev/null || true
-        pm2 delete all 2>/dev/null || true
+    if ! command_exists pg_isready; then
+        missing_deps+=("postgresql-client")
     fi
     
-    # Wait for processes to fully stop
-    print_status "Waiting for processes to stop..."
-    sleep 3
+    # Check Node.js version
+    if command_exists node; then
+        local node_version=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
+        if [ "$node_version" -lt 18 ]; then
+            print_error "Node.js version 18+ is required. Current version: $(node --version)"
+            missing_deps+=("nodejs-18+")
+        fi
+    fi
     
-    # Final cleanup - be more selective to avoid killing important processes
-    print_status "Final cleanup..."
-    pkill -f "visipakalpojumi" 2>/dev/null || true
-    pkill -f "backend.*dist" 2>/dev/null || true
-    pkill -f "frontend.*standalone" 2>/dev/null || true
-    sleep 2
+    # Check npm version
+    if command_exists npm; then
+        local npm_version=$(npm --version | cut -d'.' -f1)
+        if [ "$npm_version" -lt 8 ]; then
+            print_warning "npm version 8+ is recommended. Current version: $(npm --version)"
+        fi
+    fi
     
-    print_success "All existing processes stopped"
+    if [ ${#missing_deps[@]} -gt 0 ]; then
+        print_error "Missing dependencies: ${missing_deps[*]}"
+        print_status "Installing missing dependencies..."
+        
+        # Install PostgreSQL client if missing
+        if [[ " ${missing_deps[*]} " =~ " postgresql-client " ]]; then
+            if command_exists apt; then
+                sudo apt update && sudo apt install -y postgresql-client
+            elif command_exists yum; then
+                sudo yum install -y postgresql
+            elif command_exists dnf; then
+                sudo dnf install -y postgresql
+            else
+                print_error "Package manager not supported. Please install postgresql-client manually."
+                exit 1
+            fi
+        fi
+        
+        # Install curl if missing
+        if [[ " ${missing_deps[*]} " =~ " curl " ]]; then
+            if command_exists apt; then
+                sudo apt update && sudo apt install -y curl
+            elif command_exists yum; then
+                sudo yum install -y curl
+            elif command_exists dnf; then
+                sudo dnf install -y curl
+            fi
+        fi
+        
+        # For Node.js, provide installation instructions
+        if [[ " ${missing_deps[*]} " =~ " node " ]] || [[ " ${missing_deps[*]} " =~ " nodejs-18+ " ]]; then
+            print_error "Please install Node.js 18+ manually:"
+            print_status "  Visit: https://nodejs.org/ or use your system package manager"
+            exit 1
+        fi
+    fi
+    
+    print_success "All system dependencies are available"
 }
 
 # Function to check if ports are available
 check_ports() {
-    print_status "Checking if ports are available..."
+    local ports=(3000 3001 5432)
+    local available=true
     
-    # Check port 3001 (backend)
-    if command -v lsof >/dev/null 2>&1; then
-        if lsof -i:3001 >/dev/null 2>&1; then
-            print_error "Port 3001 is still in use:"
-            lsof -i:3001
-            return 1
+    for port in "${ports[@]}"; do
+        if ss -tlnp | grep -q ":$port "; then
+            print_warning "Port $port is already in use"
+            available=false
         fi
-        
-        if lsof -i:3000 >/dev/null 2>&1; then
-            print_error "Port 3000 is still in use:"
-            lsof -i:3000
-            return 1
-        fi
+    done
+    
+    if [ "$available" = true ]; then
+        return 0
     else
-        # Fallback check using netstat or ss
-        if command -v netstat >/dev/null 2>&1; then
-            if netstat -tlnp | grep -q ":3000 \|:3001 "; then
-                print_error "Ports 3000 or 3001 are still in use:"
-                netstat -tlnp | grep ":3000 \|:3001 "
-                return 1
-            fi
-        elif command -v ss >/dev/null 2>&1; then
-            if ss -tlnp | grep -q ":3000 \|:3001 "; then
-                print_error "Ports 3000 or 3001 are still in use:"
-                ss -tlnp | grep ":3000 \|:3001 "
-                return 1
-            fi
-        fi
+        return 1
     fi
-    
-    print_success "Ports 3000 and 3001 are available"
-    return 0
 }
 
-# Function to start PostgreSQL
+# Function to kill existing processes
+kill_existing_processes() {
+    print_status "Stopping existing application processes..."
+    
+    # Kill processes on specific ports
+    local ports=(3000 3001)
+    for port in "${ports[@]}"; do
+        local pids=$(ss -tlnp | grep ":$port " | awk '{print $7}' | cut -d',' -f1 | cut -d'=' -f2 | grep -v '-' | sort -u)
+        if [ ! -z "$pids" ]; then
+            for pid in $pids; do
+                if [ "$pid" != "$$" ] && [ "$pid" != "$PPID" ]; then
+                    print_status "Killing process $pid on port $port"
+                    kill -9 "$pid" 2>/dev/null || true
+                fi
+            done
+        fi
+    done
+    
+    # Kill any remaining Node.js processes from our app
+    local app_pids=$(ps aux | grep -E "(node.*dist/index.js|next-server)" | grep -v grep | awk '{print $2}')
+    if [ ! -z "$app_pids" ]; then
+        for pid in $app_pids; do
+            print_status "Killing application process $pid"
+            kill -9 "$pid" 2>/dev/null || true
+        done
+    fi
+    
+    # Wait a moment for processes to fully terminate
+    sleep 2
+    
+    print_success "Existing processes stopped"
+}
+
+# Function to start PostgreSQL with enhanced error handling
 start_postgresql() {
     print_status "Starting PostgreSQL database..."
     
@@ -256,6 +270,29 @@ start_postgresql() {
         fi
     fi
     
+    # Method 5: Try to install PostgreSQL if not available
+    if ! command -v pg_ctl >/dev/null 2>&1; then
+        print_status "PostgreSQL not installed, attempting to install..."
+        if command -v apt; then
+            sudo apt update && sudo apt install -y postgresql postgresql-contrib
+            sudo service postgresql start
+            sleep 5
+            if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+                print_success "PostgreSQL installed and started"
+                return 0
+            fi
+        elif command -v yum; then
+            sudo yum install -y postgresql postgresql-server
+            sudo postgresql-setup initdb
+            sudo systemctl start postgresql
+            sleep 5
+            if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+                print_success "PostgreSQL installed and started"
+                return 0
+            fi
+        fi
+    fi
+    
     # Final check
     if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
         print_success "PostgreSQL is now running"
@@ -267,6 +304,7 @@ start_postgresql() {
         print_status "  sudo -u postgres pg_ctl start -D /var/lib/postgresql/*/main"
         print_status "  sudo service postgresql start"
         print_status "  sudo systemctl start postgresql"
+        print_status "  sudo apt install postgresql postgresql-contrib"
         exit 1
     fi
 }
@@ -529,24 +567,36 @@ handle_migration_issues() {
     fi
 }
 
-# Function to start backend
+# Function to start backend with enhanced error handling
 start_backend() {
     print_status "Starting backend application..."
     
     cd "$BACKEND_DIR"
     
-    # Check if node_modules exists
-    if [ ! -d "node_modules" ]; then
+    # Verify backend directory structure
+    if [ ! -f "package.json" ]; then
+        print_error "Backend package.json not found. Are you in the correct directory?"
+        exit 1
+    fi
+    
+    # Check if node_modules exists and is valid
+    if [ ! -d "node_modules" ] || [ ! -f "node_modules/.package-lock.json" ]; then
         print_status "Installing Node.js dependencies for backend..."
-        npm install
+        if ! npm install; then
+            print_error "Failed to install backend dependencies"
+            exit 1
+        fi
     else
         print_status "Node.js dependencies already installed for backend"
     fi
     
     # Check if Prisma client is generated
-    if [ ! -d "node_modules/.prisma" ]; then
+    if [ ! -d "node_modules/.prisma" ] || [ ! -f "node_modules/.prisma/client/index.js" ]; then
         print_status "Generating Prisma client..."
-        npm exec prisma generate
+        if ! npm exec prisma generate; then
+            print_error "Failed to generate Prisma client"
+            exit 1
+        fi
     else
         print_status "Prisma client already generated"
     fi
@@ -556,12 +606,20 @@ start_backend() {
         print_status "Migration fix script not found - this is normal for first run"
     fi
     
-    # Build the TypeScript application
+    # Build the TypeScript application with timeout
     print_status "Building TypeScript application..."
-    if npm run build; then
+    if timeout 300 npm run build; then
         print_success "Backend build completed successfully"
     else
-        print_error "Backend build failed"
+        print_error "Backend build failed or timed out after 5 minutes"
+        print_status "Check build errors above or try building manually:"
+        print_status "  cd $BACKEND_DIR && npm run build"
+        exit 1
+    fi
+    
+    # Verify build output
+    if [ ! -f "dist/index.js" ]; then
+        print_error "Build output not found at dist/index.js"
         exit 1
     fi
     
@@ -584,24 +642,43 @@ start_backend() {
     # Ensure logs directory exists
     mkdir -p "$APP_DIR/logs"
     
-    # Start the backend application
+    # Start the backend application with better process management
     print_status "Starting backend application in production mode..."
     cd "$BACKEND_DIR"
+    
+    # Kill any existing backend processes
+    pkill -f "node.*dist/index.js" 2>/dev/null || true
+    
+    # Start backend with proper environment
     nohup env NODE_ENV=production npm start > "$APP_DIR/logs/backend.log" 2> "$APP_DIR/logs/backend-error.log" &
     BACKEND_PID=$!
     
-    # Wait for backend to start
+    # Store PID for later use
+    echo "$BACKEND_PID" > "$APP_DIR/logs/backend.pid"
+    
+    # Wait for backend to start with enhanced error handling
     print_status "Waiting for backend to start..."
-    sleep 10
+    sleep 5
     
     # Check if backend is running with detailed error reporting
     print_status "Checking backend availability..."
     local retry_count=0
-    local max_retries=6
+    local max_retries=8
     
     while [ $retry_count -lt $max_retries ]; do
+        # Check if process is still running
+        if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
+            print_error "Backend process died unexpectedly"
+            print_status "Checking backend error logs..."
+            if [ -f "$APP_DIR/logs/backend-error.log" ]; then
+                echo "=== BACKEND ERROR LOG ==="
+                tail -20 "$APP_DIR/logs/backend-error.log"
+            fi
+            exit 1
+        fi
+        
         if curl -s http://localhost:3001/health > /dev/null 2>&1; then
-            print_success "Backend application is running on port 3001"
+            print_success "Backend application is running on port 3001 (PID: $BACKEND_PID)"
             print_status "Testing backend response..."
             BACKEND_RESPONSE=$(curl -s http://localhost:3001 | head -c 200)
             if echo "$BACKEND_RESPONSE" | grep -q "Finder API\|API\|backend"; then
@@ -633,23 +710,39 @@ start_backend() {
     exit 1
 }
 
-# Function to start frontend
+# Function to start frontend with enhanced error handling
 start_frontend() {
     print_status "Starting frontend application..."
     
     cd "$FRONTEND_DIR"
     
-    # Check if node_modules exists
-    if [ ! -d "node_modules" ]; then
+    # Verify frontend directory structure
+    if [ ! -f "package.json" ]; then
+        print_error "Frontend package.json not found. Are you in the correct directory?"
+        exit 1
+    fi
+    
+    # Check if node_modules exists and is valid
+    if [ ! -d "node_modules" ] || [ ! -f "node_modules/.package-lock.json" ]; then
         print_status "Installing Node.js dependencies for frontend..."
-        npm install
+        if ! npm install; then
+            print_error "Failed to install frontend dependencies"
+            exit 1
+        fi
     else
         print_status "Node.js dependencies already installed for frontend"
     fi
     
-    # Build the frontend for production
+    # Build the frontend for production with enhanced error handling
     print_status "Building Next.js application for production..."
     print_status "This may take several minutes - please wait..."
+    
+    # Clean previous build if it exists
+    if [ -d ".next" ]; then
+        print_status "Cleaning previous build..."
+        rm -rf .next
+    fi
+    
     if timeout 600 npm run build; then
         print_success "Frontend build completed successfully"
         
@@ -662,6 +755,16 @@ start_frontend() {
         else
             print_warning "No CSS files found - this might cause styling issues"
         fi
+        
+        # Verify JavaScript files are generated
+        print_status "Verifying JavaScript build..."
+        if find .next/static/chunks -name "*.js" 2>/dev/null | grep -q js; then
+            print_success "JavaScript files generated successfully"
+            JS_COUNT=$(find .next/static/chunks -name "*.js" 2>/dev/null | wc -l)
+            print_status "Found $JS_COUNT JavaScript files"
+        else
+            print_warning "No JavaScript files found - this might cause functionality issues"
+        fi
     else
         print_error "Frontend build failed or timed out after 10 minutes"
         print_status "Check build errors above or try building manually:"
@@ -673,6 +776,7 @@ start_frontend() {
     if [ ! -f ".next/standalone/server.js" ]; then
         print_error "Standalone server not found at .next/standalone/server.js"
         print_status "Build may have failed or standalone output not configured"
+        print_status "Check next.config.js for standalone: true setting"
         exit 1
     fi
     
@@ -748,11 +852,59 @@ start_frontend() {
     exit 1
 }
 
+# Function to check if application is already running
+check_application_status() {
+    print_status "Checking if application is already running..."
+    
+    local backend_running=false
+    local frontend_running=false
+    
+    # Check backend
+    if curl -s http://localhost:3001/health > /dev/null 2>&1; then
+        backend_running=true
+        print_status "Backend is already running on port 3001"
+    fi
+    
+    # Check frontend
+    if curl -s http://localhost:3000 > /dev/null 2>&1; then
+        frontend_running=true
+        print_status "Frontend is already running on port 3000"
+    fi
+    
+    if [ "$backend_running" = true ] && [ "$frontend_running" = true ]; then
+        print_success "Application is already running!"
+        echo ""
+        echo "📊 Current Application Status:"
+        echo "- Backend: http://localhost:3001 (Running)"
+        echo "- Frontend: http://localhost:3000 (Running)"
+        echo "- Database: PostgreSQL on port 5432"
+        echo ""
+        echo "🎯 Access the dashboard at: http://localhost:3000"
+        echo ""
+        echo "📋 Useful commands:"
+        echo "- View backend logs: tail -f $APP_DIR/logs/backend.log"
+        echo "- View frontend logs: tail -f $APP_DIR/logs/frontend.log"
+        echo "- Stop all processes: $APP_DIR/stop.sh"
+        echo ""
+        echo "✅ No action needed - application is already running."
+        exit 0
+    elif [ "$backend_running" = true ] || [ "$frontend_running" = true ]; then
+        print_warning "Partial application detected - some services are already running"
+        print_status "Will restart all services to ensure consistency"
+    fi
+}
+
 # Main execution
 print_status "Starting application startup sequence..."
 
 # Create logs directory
 mkdir -p "$APP_DIR/logs"
+
+# Check system dependencies
+check_dependencies
+
+# Check if application is already running
+check_application_status
 
 # Kill existing processes
 kill_existing_processes
@@ -821,3 +973,73 @@ echo "3. If you see JSON, you're on the wrong URL"
 echo "4. For external access, use the external IP shown above"
 echo ""
 echo "✅ Startup complete! Both services are running."
+
+# Create stop script if it doesn't exist
+create_stop_script() {
+    if [ ! -f "$APP_DIR/stop.sh" ]; then
+        cat > "$APP_DIR/stop.sh" << 'EOF'
+#!/bin/bash
+# Stop script for VisiPakalpojumi application
+
+APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOGS_DIR="$APP_DIR/logs"
+
+echo "🛑 Stopping VisiPakalpojumi application..."
+
+# Stop backend
+if [ -f "$LOGS_DIR/backend.pid" ]; then
+    BACKEND_PID=$(cat "$LOGS_DIR/backend.pid")
+    if kill -0 "$BACKEND_PID" 2>/dev/null; then
+        echo "Stopping backend (PID: $BACKEND_PID)..."
+        kill "$BACKEND_PID"
+        sleep 2
+        if kill -0 "$BACKEND_PID" 2>/dev/null; then
+            echo "Force killing backend..."
+            kill -9 "$BACKEND_PID"
+        fi
+    fi
+    rm -f "$LOGS_DIR/backend.pid"
+fi
+
+# Stop frontend
+if [ -f "$LOGS_DIR/frontend.pid" ]; then
+    FRONTEND_PID=$(cat "$LOGS_DIR/frontend.pid")
+    if kill -0 "$FRONTEND_PID" 2>/dev/null; then
+        echo "Stopping frontend (PID: $FRONTEND_PID)..."
+        kill "$FRONTEND_PID"
+        sleep 2
+        if kill -0 "$FRONTEND_PID" 2>/dev/null; then
+            echo "Force killing frontend..."
+            kill -9 "$FRONTEND_PID"
+        fi
+    fi
+    rm -f "$LOGS_DIR/frontend.pid"
+fi
+
+# Kill any remaining processes on our ports
+echo "Cleaning up ports..."
+pkill -f "node.*dist/index.js" 2>/dev/null || true
+pkill -f "next-server" 2>/dev/null || true
+
+# Check if ports are free
+sleep 2
+if ! ss -tlnp | grep -q ":3000 "; then
+    echo "✅ Port 3000 is free"
+else
+    echo "⚠️  Port 3000 may still be in use"
+fi
+
+if ! ss -tlnp | grep -q ":3001 "; then
+    echo "✅ Port 3001 is free"
+else
+    echo "⚠️  Port 3001 may still be in use"
+fi
+
+echo "✅ Application stopped successfully!"
+EOF
+        chmod +x "$APP_DIR/stop.sh"
+        print_success "Stop script created at $APP_DIR/stop.sh"
+    fi
+}
+
+create_stop_script
