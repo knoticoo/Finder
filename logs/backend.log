@@ -2,4 +2,11 @@
 > visipakalpojumi-backend@1.0.0 start
 > node dist/index.js
 
-⚠️  Running in development mode without database
+✅ Database connected successfully
+🚀 Server running on port 3001
+📊 Environment: development
+🔗 Health check: http://localhost:3001/health
+🌐 Public access: http://0.0.0.0:3001/health
+[0mGET /api/health [33m404[0m 1.683 ms - 959[0m
+[0mGET / [32m200[0m 0.504 ms - 365[0m
+[0mGET /api/users/stats [33m401[0m 0.514 ms - 51[0m
