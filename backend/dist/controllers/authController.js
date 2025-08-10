@@ -39,6 +39,24 @@ const register = async (req, res) => {
                 createdAt: true
             }
         });
+        if (user.role === 'PROVIDER') {
+            await database_1.prisma.providerProfile.create({
+                data: {
+                    userId: user.id,
+                    businessName: null,
+                    description: null,
+                    address: null,
+                    city: null,
+                    postalCode: null,
+                    website: null,
+                    socialMedia: null,
+                    hasInsurance: false,
+                    insuranceDetails: null,
+                    certifications: [],
+                    businessHours: null
+                }
+            });
+        }
         const token = (0, jwt_1.generateToken)({
             userId: user.id,
             email: user.email,
