@@ -19,8 +19,8 @@
     "lucide-react": "^0.536.0",
     "next": "^15.4.5",
     "next-intl": "^4.3.4",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-hook-form": "^7.62.0",
     "socket.io-client": "^4.8.1",
     "zod": "^4.0.14"
@@ -28,8 +28,8 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
     "autoprefixer": "^10.4.16",
     "eslint": "^9",
     "eslint-config-next": "15.4.5",
