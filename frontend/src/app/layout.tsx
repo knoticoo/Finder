@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers/Providers'
 import ServiceWorkerRegistration from '@/components/pwa/ServiceWorkerRegistration'
 import PWAInstall from '@/components/pwa/PWAInstall'
 
-const inter = Inter({ subsets: ['latin'] })
+// Use system fonts as fallback to avoid network dependency issues
+const fontClass = 'font-sans'
 
 export const metadata: Metadata = {
   title: 'VisiPakalpojumi - Visi Pakalpojumi Latvijā',
@@ -78,7 +78,7 @@ export default function RootLayout({
         <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#2563eb" />
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
-      <body className={`${inter.className} h-full bg-gray-50 antialiased`}>
+      <body className={`${fontClass} h-full bg-gray-50 antialiased`}>
         <Providers>
           {children}
           <ServiceWorkerRegistration />
