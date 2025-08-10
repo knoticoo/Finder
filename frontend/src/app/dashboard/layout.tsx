@@ -20,6 +20,7 @@ import {
 import MobileNavigation from '@/components/navigation/MobileNavigation'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import NetworkStatus from '@/components/network/NetworkStatus'
+import VPSDebugInfo from '@/components/debug/VPSDebugInfo'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -224,6 +225,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </main>
       </div>
+      <VPSDebugInfo />
     </div>
   )
 }

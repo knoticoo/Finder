@@ -36,6 +36,8 @@ export default function ProviderDashboard() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      console.log('Provider dashboard: Starting data fetch')
+      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL)
       try {
         // Fetch user stats
         const statsResponse = await userAPI.getStats()

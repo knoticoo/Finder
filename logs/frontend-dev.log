@@ -18,3 +18,4 @@ https://nextjs.org/telemetry
  ✓ Compiled / in 2.9s
  GET / 200 in 3286ms
    Reload env: .env.local
+   Reload env: .env.local

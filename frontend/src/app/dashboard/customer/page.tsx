@@ -27,6 +27,8 @@ export default function CustomerDashboard() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      console.log('Customer dashboard: Starting data fetch')
+      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL)
       try {
         // Fetch user stats
         const statsResponse = await userAPI.getStats()
