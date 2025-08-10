@@ -41,6 +41,11 @@ export default function CustomerDashboard() {
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
+        // Don't show error for network issues, just show empty state
+        if (error?.response?.status === 401) {
+          // Token is invalid, let the interceptor handle it
+          return
+        }
       } finally {
         setIsLoading(false)
       }

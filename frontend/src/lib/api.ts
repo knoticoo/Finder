@@ -28,8 +28,16 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/auth/login'
+      // Only logout if we're not already on auth pages
+      const currentPath = window.location.pathname
+      if (!currentPath.includes('/auth/')) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        console.warn('Authentication failed, redirecting to login')
+        window.location.href = '/auth/login'
+      }
+    } else if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+      console.error('Backend server is not accessible:', error.message)
     }
     return Promise.reject(error)
   }

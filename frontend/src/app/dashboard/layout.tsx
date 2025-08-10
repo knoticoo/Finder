@@ -19,6 +19,7 @@ import {
 } from '@heroicons/react/24/outline'
 import MobileNavigation from '@/components/navigation/MobileNavigation'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import NetworkStatus from '@/components/network/NetworkStatus'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -83,6 +84,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <NetworkStatus />
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
