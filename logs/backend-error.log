@@ -1,3 +1,31 @@
 Warning: connect.session() MemoryStore is not
 designed for a production environment, as it will leak
 memory, and will not scale past a single process.
+Registration error: PrismaClientKnownRequestError: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+The column `users.googleId` does not exist in the current database.
+    at $n.handleRequestError (/workspace/backend/node_modules/@prisma/client/runtime/library.js:121:7315)
+    at $n.handleAndLogRequestError (/workspace/backend/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/workspace/backend/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/workspace/backend/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async register (/workspace/backend/dist/controllers/authController.js:10:30) {
+  code: 'P2022',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'User', column: 'users.googleId' }
+}
+Registration error: PrismaClientKnownRequestError: 
+Invalid `prisma.user.findUnique()` invocation:
+
+
+The column `users.googleId` does not exist in the current database.
+    at $n.handleRequestError (/workspace/backend/node_modules/@prisma/client/runtime/library.js:121:7315)
+    at $n.handleAndLogRequestError (/workspace/backend/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/workspace/backend/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/workspace/backend/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async register (/workspace/backend/dist/controllers/authController.js:10:30) {
+  code: 'P2022',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'User', column: 'users.googleId' }
+}
