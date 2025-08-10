@@ -26,6 +26,8 @@ export default function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [categories, setCategories] = useState<string[]>([])
 
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+
   useEffect(() => {
     fetchServices()
     fetchCategories()
@@ -33,7 +35,7 @@ export default function ServicesPage() {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch('/api/services')
+      const response = await fetch(`${API_BASE_URL}/api/services`)
       if (response.ok) {
         const data = await response.json()
         if (data.success) {
@@ -49,7 +51,7 @@ export default function ServicesPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/services/categories')
+      const response = await fetch(`${API_BASE_URL}/api/services/categories`)
       if (response.ok) {
         const data = await response.json()
         if (data.success) {
