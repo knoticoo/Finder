@@ -761,7 +761,15 @@ start_frontend() {
     
     # Build with production script that should skip linting
     print_status "Building Next.js application (production mode)..."
-    if timeout 600 npm run build:production; then
+    print_status "DEBUG: About to run npm run build:production with timeout 600..."
+    print_status "DEBUG: Current directory: $(pwd)"
+    print_status "DEBUG: NODE_ENV=$NODE_ENV, SKIP_ENV_VALIDATION=$SKIP_ENV_VALIDATION"
+    print_status "DEBUG: Starting build command now..."
+    print_status "DEBUG: Running: timeout 600 npm run build:production"
+    echo "=== BUILD OUTPUT START ==="
+    if timeout 600 npm run build:production 2>&1 | tee /tmp/build_output.log; then
+        echo "=== BUILD OUTPUT END ==="
+        print_status "DEBUG: npm run build:production completed successfully!"
         print_success "Frontend build completed successfully"
         
         # Verify CSS files are generated
@@ -784,6 +792,10 @@ start_frontend() {
             print_warning "No JavaScript files found - this might cause functionality issues"
         fi
     else
+        echo "=== BUILD OUTPUT END (FAILED) ==="
+        print_error "DEBUG: npm run build:production failed or timed out after 10 minutes"
+        print_status "DEBUG: Last few lines of build output:"
+        tail -10 /tmp/build_output.log 2>/dev/null || echo "No build output found"
         print_error "Frontend build failed or timed out after 10 minutes"
         print_status "Check build errors above or try building manually:"
         print_status "  cd $FRONTEND_DIR && npm run build"
