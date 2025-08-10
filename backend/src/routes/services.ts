@@ -12,6 +12,11 @@ import { validateService } from '@/middleware/validation';
 
 const router = Router();
 
+// Test endpoint
+router.get('/test', (req, res) => {
+  res.json({ success: true, message: 'Services routes working' });
+});
+
 // Public routes
 router.get('/', getAllServices);
 router.get('/categories', getServiceCategories);
