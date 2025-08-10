@@ -84,33 +84,45 @@ kill_existing_processes() {
     print_status "Freeing up ports 3000 and 3001..."
     
     # Method 1: Using fuser (if available)
-    fuser -k 3000/tcp 2>/dev/null || true
-    fuser -k 3001/tcp 2>/dev/null || true
+    if command -v fuser >/dev/null 2>&1; then
+        fuser -k 3000/tcp 2>/dev/null || true
+        fuser -k 3001/tcp 2>/dev/null || true
+    fi
     
     # Method 2: Using lsof (if available)
     if command -v lsof >/dev/null 2>&1; then
-        lsof -ti:3000 | xargs kill -9 2>/dev/null || true
-        lsof -ti:3001 | xargs kill -9 2>/dev/null || true
+        lsof -ti:3000 2>/dev/null | xargs -r kill -9 2>/dev/null || true
+        lsof -ti:3001 2>/dev/null | xargs -r kill -9 2>/dev/null || true
     fi
     
     # Method 3: Using netstat and kill (fallback)
     if command -v netstat >/dev/null 2>&1; then
-        netstat -tlnp | grep ":3000 " | awk '{print $7}' | cut -d'/' -f1 | xargs kill -9 2>/dev/null || true
-        netstat -tlnp | grep ":3001 " | awk '{print $7}' | cut -d'/' -f1 | xargs kill -9 2>/dev/null || true
+        netstat -tlnp 2>/dev/null | grep ":3000 " | awk '{print $7}' | cut -d'/' -f1 | xargs -r kill -9 2>/dev/null || true
+        netstat -tlnp 2>/dev/null | grep ":3001 " | awk '{print $7}' | cut -d'/' -f1 | xargs -r kill -9 2>/dev/null || true
     fi
     
-    # Kill PM2 processes
-    print_status "Stopping PM2 processes..."
-    pm2 stop all 2>/dev/null || true
-    pm2 delete all 2>/dev/null || true
+    # Method 4: Using ss (if available and netstat is not)
+    if command -v ss >/dev/null 2>&1 && ! command -v netstat >/dev/null 2>&1; then
+        ss -tlnp 2>/dev/null | grep ":3000 " | awk '{print $6}' | cut -d',' -f2 | cut -d'=' -f2 | xargs -r kill -9 2>/dev/null || true
+        ss -tlnp 2>/dev/null | grep ":3001 " | awk '{print $6}' | cut -d',' -f2 | cut -d'=' -f2 | xargs -r kill -9 2>/dev/null || true
+    fi
+    
+    # Kill PM2 processes if PM2 is available
+    if command -v pm2 >/dev/null 2>&1; then
+        print_status "Stopping PM2 processes..."
+        pm2 stop all 2>/dev/null || true
+        pm2 delete all 2>/dev/null || true
+    fi
     
     # Wait for processes to fully stop
     print_status "Waiting for processes to stop..."
-    sleep 5
+    sleep 3
     
-    # Final aggressive cleanup
+    # Final cleanup - be more selective to avoid killing important processes
     print_status "Final cleanup..."
-    pkill -9 -f "node" 2>/dev/null || true
+    pkill -f "visipakalpojumi" 2>/dev/null || true
+    pkill -f "backend.*dist" 2>/dev/null || true
+    pkill -f "frontend.*standalone" 2>/dev/null || true
     sleep 2
     
     print_success "All existing processes stopped"
@@ -167,31 +179,7 @@ start_postgresql() {
     # Try to start PostgreSQL using different methods
     print_status "PostgreSQL not running, attempting to start..."
     
-    # Method 1: Try systemctl (systemd)
-    if command -v systemctl >/dev/null 2>&1; then
-        print_status "Trying to start PostgreSQL with systemctl..."
-        if sudo systemctl start postgresql 2>/dev/null; then
-            print_success "PostgreSQL started with systemctl"
-            sleep 3
-            if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
-                return 0
-            fi
-        fi
-    fi
-    
-    # Method 2: Try service command
-    if command -v service >/dev/null 2>&1; then
-        print_status "Trying to start PostgreSQL with service command..."
-        if sudo service postgresql start 2>/dev/null; then
-            print_success "PostgreSQL started with service command"
-            sleep 3
-            if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
-                return 0
-            fi
-        fi
-    fi
-    
-    # Method 3: Try pg_ctlcluster (Debian/Ubuntu specific)
+    # Method 1: Try pg_ctlcluster (Debian/Ubuntu specific) - most reliable
     if command -v pg_ctlcluster >/dev/null 2>&1; then
         print_status "Trying to start PostgreSQL with pg_ctlcluster..."
         # Get the PostgreSQL version
@@ -207,23 +195,65 @@ start_postgresql() {
         fi
     fi
     
-    # Method 4: Try direct pg_ctl command
+    # Method 2: Try direct pg_ctl command with proper config
     if command -v pg_ctl >/dev/null 2>&1; then
         print_status "Trying to start PostgreSQL with pg_ctl..."
-        # Try to find PostgreSQL data directory
+        # Try to find PostgreSQL data directory and config
         for data_dir in /var/lib/postgresql/*/main /usr/local/var/postgres /var/lib/pgsql/data; do
             if [ -d "$data_dir" ]; then
                 print_status "Found PostgreSQL data directory: $data_dir"
-                if sudo -u postgres pg_ctl start -D "$data_dir" 2>/dev/null; then
-                    print_success "PostgreSQL started with pg_ctl"
-                    sleep 3
-                    if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
-                        return 0
+                # Check for config file
+                config_file=""
+                version_dir=$(dirname "$data_dir")
+                version=$(basename "$version_dir")
+                if [ -f "/etc/postgresql/$version/main/postgresql.conf" ]; then
+                    config_file="/etc/postgresql/$version/main/postgresql.conf"
+                fi
+                
+                if [ ! -z "$config_file" ]; then
+                    if sudo -u postgres pg_ctl start -D "$data_dir" -o "-c config_file=$config_file" 2>/dev/null; then
+                        print_success "PostgreSQL started with pg_ctl and config"
+                        sleep 3
+                        if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+                            return 0
+                        fi
+                    fi
+                else
+                    if sudo -u postgres pg_ctl start -D "$data_dir" 2>/dev/null; then
+                        print_success "PostgreSQL started with pg_ctl"
+                        sleep 3
+                        if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+                            return 0
+                        fi
                     fi
                 fi
                 break
             fi
         done
+    fi
+    
+    # Method 3: Try systemctl (systemd) if available
+    if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
+        print_status "Trying to start PostgreSQL with systemctl..."
+        if sudo systemctl start postgresql 2>/dev/null; then
+            print_success "PostgreSQL started with systemctl"
+            sleep 3
+            if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+                return 0
+            fi
+        fi
+    fi
+    
+    # Method 4: Try service command
+    if command -v service >/dev/null 2>&1; then
+        print_status "Trying to start PostgreSQL with service command..."
+        if sudo service postgresql start 2>/dev/null; then
+            print_success "PostgreSQL started with service command"
+            sleep 3
+            if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+                return 0
+            fi
+        fi
     fi
     
     # Final check
@@ -232,9 +262,10 @@ start_postgresql() {
         return 0
     else
         print_error "Failed to start PostgreSQL with all methods"
-        print_status "Please start PostgreSQL manually:"
+        print_status "Manual commands to try:"
+        print_status "  sudo pg_ctlcluster <version> main start"
+        print_status "  sudo -u postgres pg_ctl start -D /var/lib/postgresql/*/main"
         print_status "  sudo service postgresql start"
-        print_status "  # or #"
         print_status "  sudo systemctl start postgresql"
         exit 1
     fi
@@ -618,7 +649,8 @@ start_frontend() {
     
     # Build the frontend for production
     print_status "Building Next.js application for production..."
-    if npm run build; then
+    print_status "This may take several minutes - please wait..."
+    if timeout 600 npm run build; then
         print_success "Frontend build completed successfully"
         
         # Verify CSS files are generated
@@ -631,8 +663,9 @@ start_frontend() {
             print_warning "No CSS files found - this might cause styling issues"
         fi
     else
-        print_error "Frontend build failed"
-        print_status "Check build errors above"
+        print_error "Frontend build failed or timed out after 10 minutes"
+        print_status "Check build errors above or try building manually:"
+        print_status "  cd $FRONTEND_DIR && npm run build"
         exit 1
     fi
     
