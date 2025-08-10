@@ -130,15 +130,27 @@ check_dependencies() {
 
 # Function to check if ports are available
 check_ports() {
-    local ports=(3000 3001 5432)
+    local app_ports=(3000 3001)
     local available=true
     
-    for port in "${ports[@]}"; do
+    for port in "${app_ports[@]}"; do
         if ss -tlnp | grep -q ":$port "; then
             print_warning "Port $port is already in use"
             available=false
         fi
     done
+    
+    # Check PostgreSQL port separately - it should be running
+    if ss -tlnp | grep -q ":5432 "; then
+        if pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
+            print_status "PostgreSQL is running on port 5432 (expected)"
+        else
+            print_warning "Port 5432 is in use but PostgreSQL is not responding properly"
+            available=false
+        fi
+    else
+        print_status "PostgreSQL is not running on port 5432 - will start it"
+    fi
     
     if [ "$available" = true ]; then
         return 0
