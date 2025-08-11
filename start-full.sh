@@ -879,8 +879,8 @@ start_frontend() {
                 print_status "Response preview: $(echo "$FRONTEND_RESPONSE" | head -c 200)"
             fi
             
-            # Check external IP access
-            EXTERNAL_IP=$(curl -s ifconfig.me 2>/dev/null || echo "unknown")
+            # Check external IP access (override with SERVER_IP if provided)
+            EXTERNAL_IP="${SERVER_IP:-$(curl -s ifconfig.me 2>/dev/null || echo "unknown")}"
             print_status "External IP: $EXTERNAL_IP"
             if [ "$EXTERNAL_IP" != "unknown" ]; then
                 print_status "Frontend should be accessible at: http://$EXTERNAL_IP:3000"
@@ -999,19 +999,38 @@ echo "- Frontend PID: $FRONTEND_PID"
 echo ""
 echo "🌐 Services:"
 echo "- PostgreSQL Database: Running on port 5432"
-echo "- Backend API: http://localhost:3001"
-echo "- Frontend Dashboard: http://localhost:3000"
-echo "- Health Check: http://localhost:3001/health"
+
+# Local status checks
+if curl -s -f http://localhost:3001/health > /dev/null 2>&1; then
+  echo "- Backend (local): ONLINE http://localhost:3001"
+else
+  echo "- Backend (local): OFFLINE http://localhost:3001"
+fi
+if curl -s -f http://localhost:3000 > /dev/null 2>&1; then
+  echo "- Frontend (local): ONLINE http://localhost:3000"
+else
+  echo "- Frontend (local): OFFLINE http://localhost:3000"
+fi
+
+# Effective API URL used by frontend
 if [ -f "$FRONTEND_DIR/.env.local" ]; then
   EFFECTIVE_API_URL=$(grep '^NEXT_PUBLIC_API_URL=' "$FRONTEND_DIR/.env.local" | cut -d'=' -f2-)
   [ -n "$EFFECTIVE_API_URL" ] && echo "- Frontend API URL: $EFFECTIVE_API_URL"
 fi
 
-# Get external IP for remote access
-EXTERNAL_IP=$(curl -s ifconfig.me 2>/dev/null || echo "unknown")
+# External checks using provided SERVER_IP if available, fallback to auto-detect
+EXTERNAL_IP="${SERVER_IP:-$(curl -s ifconfig.me 2>/dev/null || echo "unknown")}" 
 if [ "$EXTERNAL_IP" != "unknown" ]; then
-    echo "- External Frontend: http://$EXTERNAL_IP:3000"
-    echo "- External Backend: http://$EXTERNAL_IP:3001"
+  if curl -s -f http://$EXTERNAL_IP:3001/health > /dev/null 2>&1; then
+    echo "- Backend (external): ONLINE http://$EXTERNAL_IP:3001"
+  else
+    echo "- Backend (external): OFFLINE http://$EXTERNAL_IP:3001"
+  fi
+  if curl -s -f http://$EXTERNAL_IP:3000 > /dev/null 2>&1; then
+    echo "- Frontend (external): ONLINE http://$EXTERNAL_IP:3000"
+  else
+    echo "- Frontend (external): OFFLINE http://$EXTERNAL_IP:3000"
+  fi
 fi
 
 echo ""
