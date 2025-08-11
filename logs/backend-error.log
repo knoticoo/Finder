@@ -1,0 +1,57 @@
+Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+Error: {
+  message: 'Not Found - /api/auth/me',
+  stack: 'Error: Not Found - /api/auth/me\n' +
+    '    at notFound (/workspace/backend/dist/middleware/notFound.js:5:19)\n' +
+    '    at Layer.handle [as handle_request] (/workspace/backend/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at trim_prefix (/workspace/backend/node_modules/express/lib/router/index.js:328:13)\n' +
+    '    at /workspace/backend/node_modules/express/lib/router/index.js:286:9\n' +
+    '    at Function.process_params (/workspace/backend/node_modules/express/lib/router/index.js:346:12)\n' +
+    '    at next (/workspace/backend/node_modules/express/lib/router/index.js:280:10)\n' +
+    '    at /workspace/backend/node_modules/express/lib/router/index.js:646:15\n' +
+    '    at next (/workspace/backend/node_modules/express/lib/router/index.js:265:14)\n' +
+    '    at Function.handle (/workspace/backend/node_modules/express/lib/router/index.js:175:3)\n' +
+    '    at router (/workspace/backend/node_modules/express/lib/router/index.js:47:12)',
+  url: '/api/auth/me',
+  method: 'GET',
+  ip: '::1',
+  userAgent: 'curl/8.12.1'
+}
+Error: {
+  message: 'Not Found - /auth/me',
+  stack: 'Error: Not Found - /auth/me\n' +
+    '    at notFound (/workspace/backend/dist/middleware/notFound.js:5:19)\n' +
+    '    at Layer.handle [as handle_request] (/workspace/backend/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at trim_prefix (/workspace/backend/node_modules/express/lib/router/index.js:328:13)\n' +
+    '    at /workspace/backend/node_modules/express/lib/router/index.js:286:9\n' +
+    '    at Function.process_params (/workspace/backend/node_modules/express/lib/router/index.js:346:12)\n' +
+    '    at next (/workspace/backend/node_modules/express/lib/router/index.js:280:10)\n' +
+    '    at logger (/workspace/backend/node_modules/morgan/index.js:144:5)\n' +
+    '    at Layer.handle [as handle_request] (/workspace/backend/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at trim_prefix (/workspace/backend/node_modules/express/lib/router/index.js:328:13)\n' +
+    '    at /workspace/backend/node_modules/express/lib/router/index.js:286:9',
+  url: '/auth/me',
+  method: 'GET',
+  ip: '::1',
+  userAgent: 'curl/8.12.1'
+}
+Error: {
+  message: 'Not Found - /api/auth/me',
+  stack: 'Error: Not Found - /api/auth/me\n' +
+    '    at notFound (/workspace/backend/dist/middleware/notFound.js:5:19)\n' +
+    '    at Layer.handle [as handle_request] (/workspace/backend/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at trim_prefix (/workspace/backend/node_modules/express/lib/router/index.js:328:13)\n' +
+    '    at /workspace/backend/node_modules/express/lib/router/index.js:286:9\n' +
+    '    at Function.process_params (/workspace/backend/node_modules/express/lib/router/index.js:346:12)\n' +
+    '    at next (/workspace/backend/node_modules/express/lib/router/index.js:280:10)\n' +
+    '    at /workspace/backend/node_modules/express/lib/router/index.js:646:15\n' +
+    '    at next (/workspace/backend/node_modules/express/lib/router/index.js:265:14)\n' +
+    '    at Function.handle (/workspace/backend/node_modules/express/lib/router/index.js:175:3)\n' +
+    '    at router (/workspace/backend/node_modules/express/lib/router/index.js:47:12)',
+  url: '/api/auth/me',
+  method: 'GET',
+  ip: '::1',
+  userAgent: 'curl/8.12.1'
+}
