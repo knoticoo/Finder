@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '@/middleware/auth';
 import { prisma } from '@/config/database';
+import { NotificationService } from '@/controllers/notifications';
 
 export const createBooking = async (req: AuthRequest, res: Response): Promise<void> => {
   try {

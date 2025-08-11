@@ -72,35 +72,22 @@ api.interceptors.response.use(
       isRefreshing = true
 
       try {
-        // Try to refresh the token
-        const refreshResponse = await api.post('/api/auth/refresh-token')
-        
-        if (refreshResponse.data.success) {
-          const { token, user } = refreshResponse.data
-          
-          // Update stored auth data
-          localStorage.setItem('token', token)
-          localStorage.setItem('user', JSON.stringify(user))
-          
-          // Update the authorization header
-          api.defaults.headers.Authorization = `Bearer ${token}`
-          originalRequest.headers.Authorization = `Bearer ${token}`
-          
-          processQueue(null, token)
-          
-          // Retry the original request
-          return api(originalRequest)
-        } else {
-          throw new Error('Token refresh failed')
-        }
+        // Try to refresh the token - but for now, just clear auth and redirect
+        // since refresh token endpoint may not be implemented yet
+        throw new Error('Token expired')
       } catch (refreshError) {
         processQueue(refreshError, null)
         
         // Clear auth data and redirect to login
         localStorage.removeItem('token')
         localStorage.removeItem('user')
-        console.warn('Token refresh failed, redirecting to login')
-        window.location.href = '/auth/login'
+        console.warn('Session expired, redirecting to login')
+        
+        // Only redirect if not already on auth pages and not on public pages
+        const publicPages = ['/services', '/']
+        if (!publicPages.includes(currentPath) && !currentPath.includes('/auth/')) {
+          window.location.href = '/auth/login'
+        }
         
         return Promise.reject(refreshError)
       } finally {
