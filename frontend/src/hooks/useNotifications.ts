@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
+import { getApiBaseUrl } from '@/lib/config'
 
 interface Notification {
   id: string
@@ -31,7 +32,9 @@ export function useNotifications(): UseNotificationsReturn {
     const token = localStorage.getItem('token')
     if (!token) return
 
-    const newSocket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001', {
+    const baseUrl = getApiBaseUrl()
+
+    const newSocket = io(baseUrl, {
       auth: {
         token
       }
@@ -87,7 +90,8 @@ export function useNotifications(): UseNotificationsReturn {
         const token = localStorage.getItem('token')
         if (!token) return
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications`, {
+        const apiBase = getApiBaseUrl()
+        const response = await fetch(`${apiBase}/api/notifications`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -110,7 +114,8 @@ export function useNotifications(): UseNotificationsReturn {
       const token = localStorage.getItem('token')
       if (!token) return
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${id}/read`, {
+      const apiBase = getApiBaseUrl()
+      const response = await fetch(`${apiBase}/api/notifications/${id}/read`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -136,7 +141,8 @@ export function useNotifications(): UseNotificationsReturn {
       const token = localStorage.getItem('token')
       if (!token) return
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/read-all`, {
+      const apiBase = getApiBaseUrl()
+      const response = await fetch(`${apiBase}/api/notifications/read-all`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -158,7 +164,8 @@ export function useNotifications(): UseNotificationsReturn {
       const token = localStorage.getItem('token')
       if (!token) return
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${id}`, {
+      const apiBase = getApiBaseUrl()
+      const response = await fetch(`${apiBase}/api/notifications/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
