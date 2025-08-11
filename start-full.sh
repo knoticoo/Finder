@@ -662,7 +662,8 @@ start_backend() {
     pkill -f "node.*dist/index.js" 2>/dev/null || true
     
     # Start backend with proper environment
-    nohup env NODE_ENV=production npm start > "$APP_DIR/logs/backend.log" 2> "$APP_DIR/logs/backend-error.log" &
+    # FRONTEND_URL helps backend CORS; default to http://localhost:3000 if not provided
+    nohup env NODE_ENV=production FRONTEND_URL="${FRONTEND_URL:-http://localhost:3000}" npm start > "$APP_DIR/logs/backend.log" 2> "$APP_DIR/logs/backend-error.log" &
     BACKEND_PID=$!
     
     # Store PID for later use
@@ -728,6 +729,21 @@ start_frontend() {
     
     cd "$FRONTEND_DIR"
     
+    # Ensure frontend API URL is configured for the build
+    local ENV_FILE=".env.local"
+    local API_URL_DEFAULT="http://localhost:3001"
+    local API_URL_VALUE="${NEXT_PUBLIC_API_URL:-$API_URL_DEFAULT}"
+    if [ -f "$ENV_FILE" ]; then
+        if grep -q '^NEXT_PUBLIC_API_URL=' "$ENV_FILE"; then
+            sed -i "s|^NEXT_PUBLIC_API_URL=.*$|NEXT_PUBLIC_API_URL=$API_URL_VALUE|" "$ENV_FILE"
+        else
+            echo "NEXT_PUBLIC_API_URL=$API_URL_VALUE" >> "$ENV_FILE"
+        fi
+    else
+        echo "NEXT_PUBLIC_API_URL=$API_URL_VALUE" > "$ENV_FILE"
+    fi
+    print_status "Frontend API URL set to: $API_URL_VALUE (in $ENV_FILE)"
+
     # Verify frontend directory structure
     if [ ! -f "package.json" ]; then
         print_error "Frontend package.json not found. Are you in the correct directory?"
@@ -849,13 +865,22 @@ start_frontend() {
             FRONTEND_RESPONSE=$(curl -s http://localhost:3000)
             if echo "$FRONTEND_RESPONSE" | grep -q "VisiPakalpojumi\|html\|<!DOCTYPE"; then
                 print_success "Frontend dashboard is loading correctly"
+                # Verify frontend can reach backend health
+                print_status "Verifying frontend -> backend health connectivity..."
+                FRONTEND_HEALTH_URL="${API_URL_VALUE:-http://localhost:3001}/health"
+                if curl -s -f "$FRONTEND_HEALTH_URL" > /dev/null 2>&1; then
+                    print_success "Frontend can reach backend health: $FRONTEND_HEALTH_URL"
+                else
+                    print_warning "Frontend may not reach backend at: $FRONTEND_HEALTH_URL"
+                    print_status "If using HTTPS on the site, ensure API URL is HTTPS or use Nginx same-origin proxy."
+                fi
             else
                 print_warning "Frontend is running but may not be loading correctly"
                 print_status "Response preview: $(echo "$FRONTEND_RESPONSE" | head -c 200)"
             fi
             
-            # Check external IP access
-            EXTERNAL_IP=$(curl -s ifconfig.me 2>/dev/null || echo "unknown")
+            # Check external IP access (override with SERVER_IP if provided)
+            EXTERNAL_IP="${SERVER_IP:-$(curl -s ifconfig.me 2>/dev/null || echo "unknown")}"
             print_status "External IP: $EXTERNAL_IP"
             if [ "$EXTERNAL_IP" != "unknown" ]; then
                 print_status "Frontend should be accessible at: http://$EXTERNAL_IP:3000"
@@ -974,15 +999,38 @@ echo "- Frontend PID: $FRONTEND_PID"
 echo ""
 echo "🌐 Services:"
 echo "- PostgreSQL Database: Running on port 5432"
-echo "- Backend API: http://localhost:3001"
-echo "- Frontend Dashboard: http://localhost:3000"
-echo "- Health Check: http://localhost:3001/health"
 
-# Get external IP for remote access
-EXTERNAL_IP=$(curl -s ifconfig.me 2>/dev/null || echo "unknown")
+# Local status checks
+if curl -s -f http://localhost:3001/health > /dev/null 2>&1; then
+  echo "- Backend (local): ONLINE http://localhost:3001"
+else
+  echo "- Backend (local): OFFLINE http://localhost:3001"
+fi
+if curl -s -f http://localhost:3000 > /dev/null 2>&1; then
+  echo "- Frontend (local): ONLINE http://localhost:3000"
+else
+  echo "- Frontend (local): OFFLINE http://localhost:3000"
+fi
+
+# Effective API URL used by frontend
+if [ -f "$FRONTEND_DIR/.env.local" ]; then
+  EFFECTIVE_API_URL=$(grep '^NEXT_PUBLIC_API_URL=' "$FRONTEND_DIR/.env.local" | cut -d'=' -f2-)
+  [ -n "$EFFECTIVE_API_URL" ] && echo "- Frontend API URL: $EFFECTIVE_API_URL"
+fi
+
+# External checks using provided SERVER_IP if available, fallback to auto-detect
+EXTERNAL_IP="${SERVER_IP:-$(curl -s ifconfig.me 2>/dev/null || echo "unknown")}" 
 if [ "$EXTERNAL_IP" != "unknown" ]; then
-    echo "- External Frontend: http://$EXTERNAL_IP:3000"
-    echo "- External Backend: http://$EXTERNAL_IP:3001"
+  if curl -s -f http://$EXTERNAL_IP:3001/health > /dev/null 2>&1; then
+    echo "- Backend (external): ONLINE http://$EXTERNAL_IP:3001"
+  else
+    echo "- Backend (external): OFFLINE http://$EXTERNAL_IP:3001"
+  fi
+  if curl -s -f http://$EXTERNAL_IP:3000 > /dev/null 2>&1; then
+    echo "- Frontend (external): ONLINE http://$EXTERNAL_IP:3000"
+  else
+    echo "- Frontend (external): OFFLINE http://$EXTERNAL_IP:3000"
+  fi
 fi
 
 echo ""
