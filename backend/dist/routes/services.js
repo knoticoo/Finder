@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const auth_1 = require("@/middleware/auth");
-const serviceController_1 = require("@/controllers/serviceController");
-const validation_1 = require("@/middleware/validation");
+const auth_1 = require("../middleware/auth");
+const serviceController_1 = require("../controllers/serviceController");
+const validation_1 = require("../middleware/validation");
 const router = (0, express_1.Router)();
 router.get('/test', (req, res) => {
     res.json({ success: true, message: 'Services routes working' });

@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.refreshToken = exports.verifyEmail = exports.confirmPasswordReset = exports.requestPasswordReset = exports.login = exports.register = void 0;
-const database_1 = require("@/config/database");
-const jwt_1 = require("@/utils/jwt");
-const password_1 = require("@/utils/password");
+const database_1 = require("../config/database");
+const jwt_1 = require("../utils/jwt");
+const password_1 = require("../utils/password");
 const register = async (req, res) => {
     try {
         const { email, password, firstName, lastName, phone, role, language } = req.body;
@@ -219,7 +219,7 @@ const refreshToken = async (req, res) => {
             return;
         }
         const token = authHeader.substring(7);
-        const { verifyToken, decodeToken, generateToken } = require('@/utils/jwt');
+        const { verifyToken, decodeToken, generateToken } = require('../utils/jwt');
         let decoded;
         try {
             decoded = verifyToken(token);
