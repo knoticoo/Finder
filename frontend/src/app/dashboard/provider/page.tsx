@@ -18,6 +18,7 @@ import {
 import { bookingsAPI, userAPI, servicesAPI } from '@/lib/api'
 import NotificationBell from '@/components/notifications/NotificationBell'
 import AnalyticsDashboard from '@/components/analytics/AnalyticsDashboard'
+import { getApiBaseUrl } from '@/lib/config'
 
 export default function ProviderDashboard() {
   const [stats, setStats] = useState({
@@ -37,7 +38,7 @@ export default function ProviderDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       console.log('Provider dashboard: Starting data fetch')
-      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL)
+      console.log('API URL:', getApiBaseUrl())
       try {
         // Fetch user stats
         const statsResponse = await userAPI.getStats()

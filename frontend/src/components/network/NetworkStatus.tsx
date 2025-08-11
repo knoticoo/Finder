@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
+import { getHealthUrl } from '@/lib/config'
 
 export default function NetworkStatus() {
   const [isBackendReachable, setIsBackendReachable] = useState<boolean | null>(null)
@@ -9,9 +10,8 @@ export default function NetworkStatus() {
 
   const checkBackendStatus = async () => {
     try {
-      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/health', {
+      const response = await fetch(getHealthUrl(), {
         method: 'GET',
-        timeout: 5000,
       })
       
       if (response.ok) {

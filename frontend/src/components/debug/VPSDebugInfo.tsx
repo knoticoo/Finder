@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { InformationCircleIcon } from '@heroicons/react/24/outline'
+import { getApiBaseUrl, getHealthUrl } from '@/lib/config'
 
 interface DebugInfo {
   apiUrl: string
@@ -32,14 +33,14 @@ export default function VPSDebugInfo() {
 
     let backendHealth = false
     try {
-      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/health')
+      const response = await fetch(getHealthUrl())
       backendHealth = response.ok
     } catch (e) {
       backendHealth = false
     }
 
     setDebugInfo({
-      apiUrl: process.env.NEXT_PUBLIC_API_URL || 'Not configured',
+      apiUrl: getApiBaseUrl(),
       backendHealth,
       userToken: !!token,
       currentPath: window.location.pathname,

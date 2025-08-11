@@ -12,6 +12,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline'
 import { bookingsAPI, userAPI } from '@/lib/api'
+import { getApiBaseUrl } from '@/lib/config'
 
 export default function CustomerDashboard() {
   const [stats, setStats] = useState({
@@ -28,7 +29,7 @@ export default function CustomerDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       console.log('Customer dashboard: Starting data fetch')
-      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL)
+      console.log('API URL:', getApiBaseUrl())
       try {
         // Fetch user stats
         const statsResponse = await userAPI.getStats()
