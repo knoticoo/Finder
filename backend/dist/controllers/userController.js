@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUserStats = exports.deleteAccount = exports.updateProviderProfile = exports.updateProfile = exports.getProfile = void 0;
-const database_1 = require("../config/database");
+const database_1 = require("@/config/database");
 const getProfile = async (req, res) => {
     try {
         if (!req.user) {

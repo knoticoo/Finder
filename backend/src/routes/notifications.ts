@@ -6,12 +6,12 @@ import {
   markAllAsRead,
   deleteNotification
 } from '@/controllers/notifications';
-import { authenticateToken } from '@/middleware/auth';
+import { authenticate } from '@/middleware/auth';
 
 const router = express.Router();
 
 // All routes require authentication
-router.use(authenticateToken);
+router.use(authenticate);
 
 // Get user notifications with pagination and filtering
 router.get('/', getUserNotifications);

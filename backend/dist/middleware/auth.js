@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.requireVerified = exports.authorize = exports.authenticate = void 0;
-const jwt_1 = require("../utils/jwt");
-const database_1 = require("../config/database");
+const jwt_1 = require("@/utils/jwt");
+const database_1 = require("@/config/database");
 const authenticate = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;

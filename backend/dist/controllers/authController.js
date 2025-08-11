@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.refreshToken = exports.verifyEmail = exports.confirmPasswordReset = exports.requestPasswordReset = exports.login = exports.register = void 0;
-const database_1 = require("../config/database");
-const jwt_1 = require("../utils/jwt");
-const password_1 = require("../utils/password");
+const database_1 = require("@/config/database");
+const jwt_1 = require("@/utils/jwt");
+const password_1 = require("@/utils/password");
 const register = async (req, res) => {
     try {
         const { email, password, firstName, lastName, phone, role, language } = req.body;
@@ -208,18 +208,78 @@ const verifyEmail = async (_req, res) => {
     }
 };
 exports.verifyEmail = verifyEmail;
-const refreshToken = async (_req, res) => {
+const refreshToken = async (req, res) => {
     try {
-        res.status(200).json({
-            success: true,
-            message: 'Token refreshed successfully'
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            res.status(401).json({
+                success: false,
+                message: 'Access token required'
+            });
+            return;
+        }
+        const token = authHeader.substring(7);
+        const { verifyToken, decodeToken, generateToken } = require('@/utils/jwt');
+        let decoded;
+        try {
+            decoded = verifyToken(token);
+        }
+        catch (error) {
+            decoded = decodeToken(token);
+            if (!decoded) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Invalid token'
+                });
+                return;
+            }
+        }
+        const user = await database_1.prisma.user.findUnique({
+            where: { id: decoded.userId },
+            select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                role: true,
+                language: true,
+                isVerified: true,
+                isActive: true
+            }
         });
+        if (!user || !user.isActive) {
+            res.status(401).json({
+                success: false,
+                message: 'User not found or inactive'
+            });
+            return;
+        }
+        const newToken = generateToken({
+            userId: user.id,
+            email: user.email,
+            role: user.role
+        });
+        const response = {
+            success: true,
+            message: 'Token refreshed successfully',
+            token: newToken,
+            user: {
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                role: user.role,
+                language: user.language,
+                isVerified: user.isVerified
+            }
+        };
+        res.status(200).json(response);
     }
     catch (error) {
         console.error('Token refresh error:', error);
-        res.status(500).json({
+        res.status(401).json({
             success: false,
-            message: 'Internal server error'
+            message: 'Token refresh failed'
         });
     }
 };

@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const auth_1 = require("../middleware/auth");
-const reviewController_1 = require("../controllers/reviewController");
-const validation_1 = require("../middleware/validation");
+const auth_1 = require("@/middleware/auth");
+const reviewController_1 = require("@/controllers/reviewController");
+const validation_1 = require("@/middleware/validation");
 const router = (0, express_1.Router)();
 router.get('/service/:serviceId', reviewController_1.getServiceReviews);
 router.get('/provider/:providerId', reviewController_1.getProviderReviews);
