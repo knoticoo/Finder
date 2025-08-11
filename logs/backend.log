@@ -7,9 +7,6 @@
 📊 Environment: production
 🔗 Health check: http://localhost:3001/health
 🌐 Public access: http://0.0.0.0:3001/health
-::1 - - [11/Aug/2025:20:22:51 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:20:22:53 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:20:22:53 +0000] "GET / HTTP/1.1" 200 364 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:20:23:55 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:20:24:41 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:20:24:41 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
+::1 - - [11/Aug/2025:21:27:43 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
+::1 - - [11/Aug/2025:21:27:43 +0000] "GET / HTTP/1.1" 200 364 "-" "curl/8.12.1"
+::1 - - [11/Aug/2025:21:28:20 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
