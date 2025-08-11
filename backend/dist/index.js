@@ -13,18 +13,20 @@ const express_session_1 = __importDefault(require("express-session"));
 const http_1 = require("http");
 const socket_io_1 = require("socket.io");
 const dotenv_1 = __importDefault(require("dotenv"));
-const database_1 = require("./config/database");
-const errorHandler_1 = require("./middleware/errorHandler");
-const notFound_1 = require("./middleware/notFound");
-const passport_1 = __importDefault(require("./config/passport"));
-const auth_1 = __importDefault(require("./routes/auth"));
-const users_1 = __importDefault(require("./routes/users"));
-const services_1 = __importDefault(require("./routes/services"));
-const bookings_1 = __importDefault(require("./routes/bookings"));
-const reviews_1 = __importDefault(require("./routes/reviews"));
-const messages_1 = __importDefault(require("./routes/messages"));
-const subscriptions_1 = __importDefault(require("./routes/subscriptions"));
-const referrals_1 = __importDefault(require("./routes/referrals"));
+const database_1 = require("@/config/database");
+const errorHandler_1 = require("@/middleware/errorHandler");
+const notFound_1 = require("@/middleware/notFound");
+const passport_1 = __importDefault(require("@/config/passport"));
+const auth_1 = __importDefault(require("@/routes/auth"));
+const users_1 = __importDefault(require("@/routes/users"));
+const services_1 = __importDefault(require("@/routes/services"));
+const bookings_1 = __importDefault(require("@/routes/bookings"));
+const reviews_1 = __importDefault(require("@/routes/reviews"));
+const messages_1 = __importDefault(require("@/routes/messages"));
+const subscriptions_1 = __importDefault(require("@/routes/subscriptions"));
+const referrals_1 = __importDefault(require("@/routes/referrals"));
+const notifications_1 = __importDefault(require("@/routes/notifications"));
+const notifications_2 = require("@/controllers/notifications");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const server = (0, http_1.createServer)(app);
@@ -104,6 +106,8 @@ app.use('/api/reviews', reviews_1.default);
 app.use('/api/messages', messages_1.default);
 app.use('/api/subscriptions', subscriptions_1.default);
 app.use('/api/referrals', referrals_1.default);
+app.use('/api/notifications', notifications_1.default);
+(0, notifications_2.setSocketIO)(io);
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
     socket.on('join-room', (roomId) => {
@@ -116,6 +120,10 @@ io.on('connection', (socket) => {
     });
     socket.on('send-message', (data) => {
         socket.to(data.roomId).emit('receive-message', data);
+    });
+    socket.on('join-user', (userId) => {
+        socket.join(`user:${userId}`);
+        console.log(`User ${userId} joined for notifications`);
     });
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
