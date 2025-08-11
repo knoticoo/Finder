@@ -7,17 +7,9 @@
 📊 Environment: production
 🔗 Health check: http://localhost:3001/health
 🌐 Public access: http://0.0.0.0:3001/health
-::1 - - [11/Aug/2025:10:14:49 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:14:49 +0000] "GET / HTTP/1.1" 200 364 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:15:42 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:15:44 +0000] "GET /api/auth/me HTTP/1.1" 404 52 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:15:56 +0000] "GET /auth/me HTTP/1.1" 404 48 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:15:57 +0000] "GET / HTTP/1.1" 200 364 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:16:02 +0000] "GET /api/auth/me HTTP/1.1" 404 52 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:16:14 +0000] "POST /api/auth/login HTTP/1.1" 401 49 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:32:19 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:32:30 +0000] "POST /api/auth/login HTTP/1.1" 401 49 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:32:49 +0000] "POST /api/auth/login HTTP/1.1" 401 49 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:33:05 +0000] "POST /api/auth/login HTTP/1.1" 200 495 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:33:26 +0000] "POST /api/auth/login HTTP/1.1" 200 495 "-" "curl/8.12.1"
-::1 - - [11/Aug/2025:10:33:55 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
+::1 - - [11/Aug/2025:20:22:51 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
+::1 - - [11/Aug/2025:20:22:53 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
+::1 - - [11/Aug/2025:20:22:53 +0000] "GET / HTTP/1.1" 200 364 "-" "curl/8.12.1"
+::1 - - [11/Aug/2025:20:23:55 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
+::1 - - [11/Aug/2025:20:24:41 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
+::1 - - [11/Aug/2025:20:24:41 +0000] "GET /health HTTP/1.1" 200 99 "-" "curl/8.12.1"
