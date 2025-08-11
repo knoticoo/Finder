@@ -1,6 +1,6 @@
    ▲ Next.js 15.4.5
-   - Local:        http://localhost:3000
-   - Network:      http://0.0.0.0:3000
+   - Local:        http://[::1]:3000
+   - Network:      http://[::]:3000
 
  ✓ Starting...
  ✓ Ready in 126ms
