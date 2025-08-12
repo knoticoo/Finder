@@ -846,7 +846,7 @@ start_frontend() {
     # Start the frontend production server
     print_status "Starting Next.js standalone server in production mode..."
     cd "$FRONTEND_DIR"
-    nohup env NODE_ENV=production HOSTNAME=0.0.0.0 node .next/standalone/server.js > "$APP_DIR/logs/frontend.log" 2> "$APP_DIR/logs/frontend-error.log" &
+    nohup env NODE_ENV=production HOSTNAME=:: node .next/standalone/server.js > "$APP_DIR/logs/frontend.log" 2> "$APP_DIR/logs/frontend-error.log" &
     FRONTEND_PID=$!
     
     # Wait for frontend to start
@@ -880,10 +880,15 @@ start_frontend() {
             fi
             
             # Check external IP access (override with SERVER_IP if provided)
-            EXTERNAL_IP="${SERVER_IP:-$(curl -s ifconfig.me 2>/dev/null || echo "unknown")}"
+                        EXTERNAL_IP="${SERVER_IP:-$(curl -s ifconfig.me 2>/dev/null || echo "unknown")}" 
             print_status "External IP: $EXTERNAL_IP"
             if [ "$EXTERNAL_IP" != "unknown" ]; then
-                print_status "Frontend should be accessible at: http://$EXTERNAL_IP:3000"
+                if [[ "$EXTERNAL_IP" == *:* ]]; then
+                    URL_HOST="[$EXTERNAL_IP]"
+                else
+                    URL_HOST="$EXTERNAL_IP"
+                fi
+                print_status "Frontend should be accessible at: http://$URL_HOST:3000"
             fi
             return 0
         else
@@ -1021,15 +1026,16 @@ fi
 # External checks using provided SERVER_IP if available, fallback to auto-detect
 EXTERNAL_IP="${SERVER_IP:-$(curl -s ifconfig.me 2>/dev/null || echo "unknown")}" 
 if [ "$EXTERNAL_IP" != "unknown" ]; then
-  if curl -s -f http://$EXTERNAL_IP:3001/health > /dev/null 2>&1; then
-    echo "- Backend (external): ONLINE http://$EXTERNAL_IP:3001"
+  if [[ "$EXTERNAL_IP" == *:* ]]; then URL_HOST="[$EXTERNAL_IP]"; else URL_HOST="$EXTERNAL_IP"; fi
+  if curl -s -f "http://$URL_HOST:3001/health" > /dev/null 2>&1; then
+    echo "- Backend (external): ONLINE http://$URL_HOST:3001"
   else
-    echo "- Backend (external): OFFLINE http://$EXTERNAL_IP:3001"
+    echo "- Backend (external): OFFLINE http://$URL_HOST:3001"
   fi
-  if curl -s -f http://$EXTERNAL_IP:3000 > /dev/null 2>&1; then
-    echo "- Frontend (external): ONLINE http://$EXTERNAL_IP:3000"
+  if curl -s -f "http://$URL_HOST:3000" > /dev/null 2>&1; then
+    echo "- Frontend (external): ONLINE http://$URL_HOST:3000"
   else
-    echo "- Frontend (external): OFFLINE http://$EXTERNAL_IP:3000"
+    echo "- Frontend (external): OFFLINE http://$URL_HOST:3000"
   fi
 fi
 

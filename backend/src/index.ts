@@ -173,11 +173,12 @@ const startServer = async () => {
     // Connect to database
     await connectDatabase();
     
-    server.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+    const HOST = process.env['HOST'] || '::';
+    server.listen(Number(PORT), HOST, () => {
+      console.log(`🚀 Server running on ${HOST}:${PORT}`);
       console.log(`📊 Environment: ${process.env['NODE_ENV']}`);
-      console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-      console.log(`🌐 Public access: http://0.0.0.0:${PORT}/health`);
+      const bracketedHost = HOST.includes(':') ? `[${HOST}]` : HOST;
+      console.log(`🔗 Health check: http://${bracketedHost}:${PORT}/health`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
